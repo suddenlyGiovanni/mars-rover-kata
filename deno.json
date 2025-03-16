@@ -1,7 +1,13 @@
 {
-  "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
   "license": "MIT",
+  "compilerOptions": {
+	"lib": ["deno.ns"],
+	"types": [
+	  "vitest/importMeta"
+	]
+  },
   "imports": {
-    "effect": "npm:effect@^3.13.11"
+    "effect": "npm:effect@^3.13.11",
+    "vitest": "npm:vitest@^3.0.8"
   }
 }
