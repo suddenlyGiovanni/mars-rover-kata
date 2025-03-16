@@ -15,4 +15,4 @@ export type Orientation = Data.TaggedEnum<{
 	South: object
 }>
 
-export const { North, Est, West, South } = Data.taggedEnum<Orientation>()
+export const Orientation = Data.taggedEnum<Orientation>()
