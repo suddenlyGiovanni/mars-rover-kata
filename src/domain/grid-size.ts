@@ -3,13 +3,11 @@ import { Data, Schema } from 'effect'
 import { Int } from '../types.ts'
 
 const Width = Int.pipe(Schema.brand('Width'))
-export declare namespace Width {
-	export type Type = Schema.Schema.Type<typeof Width>
-}
-
 const Height = Int.pipe(Schema.brand('Height'))
-export declare namespace Height {
-	export type Type = Schema.Schema.Type<typeof Height>
+
+export declare namespace GridSize {
+	export type Width = Schema.Schema.Type<typeof Width>
+	export type Height = Schema.Schema.Type<typeof Height>
 }
 
 /**
@@ -37,8 +35,8 @@ export declare namespace Height {
  *                     South
  */
 export class GridSize extends Data.TaggedClass('GridSize')<{
-	readonly width: Width.Type
-	readonly height: Height.Type
+	readonly width: GridSize.Width
+	readonly height: GridSize.Height
 }> {
 	/**
 	 * Width constructor
@@ -46,7 +44,7 @@ export class GridSize extends Data.TaggedClass('GridSize')<{
 	public static readonly Width: (
 		int: number,
 		options?: Schema.MakeOptions,
-	) => Width.Type = Width.make
+	) => GridSize.Width = Width.make
 
 	/**
 	 * Height constructor
@@ -54,5 +52,5 @@ export class GridSize extends Data.TaggedClass('GridSize')<{
 	public static readonly Height: (
 		int: number,
 		options?: Schema.MakeOptions,
-	) => Height.Type = Height.make
+	) => GridSize.Height = Height.make
 }
