@@ -1,11 +1,18 @@
 {
   "version": "4",
   "specifiers": {
+    "npm:@deno/vite-plugin@^1.0.4": "1.0.4_vite@6.2.2",
     "npm:effect@^3.13.11": "3.13.11",
     "npm:vitest@3.0.8": "3.0.8_vite@6.2.2",
     "npm:vitest@^3.0.8": "3.0.8_vite@6.2.2"
   },
   "npm": {
+    "@deno/vite-plugin@1.0.4_vite@6.2.2": {
+      "integrity": "sha512-xg8YT8Wn2sGXSnJgiGTpBGX1Dov0c6fd1rAp8VsfrCUtyBRRWzwVMAnd3fQ4yq8h7LSVvJUxEFN4U421k/DQLA==",
+      "dependencies": [
+        "vite"
+      ]
+    },
     "@esbuild/aix-ppc64@0.25.1": {
       "integrity": "sha512-kfYGy8IdzTGy+z0vFGvExZtxkFlA4zAxgKEahG9KE1ScBjpQnFsNOX8KTU5ojNru5ed5CVoJYXFtoxaq5nFbjQ=="
     },
@@ -428,6 +435,7 @@
   },
   "workspace": {
     "dependencies": [
+      "npm:@deno/vite-plugin@^1.0.4",
       "npm:effect@^3.13.11",
       "npm:vitest@^3.0.8"
     ]

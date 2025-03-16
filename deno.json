@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
   "license": "MIT",
   "compilerOptions": {
 	"lib": ["deno.ns"],
@@ -6,8 +7,21 @@
 	  "vitest/importMeta"
 	]
   },
+  "tasks": {
+	"test": {
+	  "command": "deno run -A --inspect npm:vitest@3.0.8",
+	  "description": "Run the project tests with vitest"
+	}
+  },
   "imports": {
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
     "effect": "npm:effect@^3.13.11",
     "vitest": "npm:vitest@^3.0.8"
+  },
+  "unstable": ["sloppy-imports"],
+  "lint": {
+	"rules": {
+	  "exclude": ["no-sloppy-imports"]
+	}
   }
 }
