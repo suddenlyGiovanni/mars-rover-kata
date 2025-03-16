@@ -20,8 +20,6 @@ function nonNegativeModulus(dividend: Int.Type, divisor: Int.Type): Int.Type {
 
 /**
  *  Implement wrapping from one edge of the grid to another (pacman effect).
- *
- *
  */
 export function move(rover: Rover, planet: Planet, command: Command): Rover {
 	return pipe(
@@ -56,7 +54,7 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 								position: rover.position.clone({
 									y: Position.Y(
 										nonNegativeModulus(
-											Int.make(rover.position.y + 1),
+											Int.add(rover.position.y, Int.unit),
 											planet.size.height,
 										),
 									),
