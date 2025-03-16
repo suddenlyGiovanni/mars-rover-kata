@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
   "license": "MIT",
+  "nodeModulesDir": "auto",
   "compilerOptions": {
 	"lib": ["deno.ns"],
 	"types": [
@@ -18,7 +19,6 @@
     "effect": "npm:effect@^3.13.11",
     "vitest": "npm:vitest@^3.0.8"
   },
-  "unstable": ["sloppy-imports"],
   "lint": {
 	"rules": {
 	  "exclude": ["no-sloppy-imports"]

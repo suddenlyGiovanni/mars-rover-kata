@@ -5,6 +5,6 @@ export default defineConfig({
 	plugins: [deno()],
 	test: {
 		includeSource: ['src/**/*.ts'],
-		include: ['src/**/*.spec.ts'],
+		include: ['src/**/*.{spec,test}.ts'],
 	},
 })
