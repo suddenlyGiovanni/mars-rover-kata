@@ -17,6 +17,20 @@ export class Position extends Data.TaggedClass('Position')<{
 	readonly y: Position.Y
 }> {
 	/**
+	 * Creates and returns a new instance of the Position object, optionally with updated coordinates.
+	 *
+	 * @param position Optional object with properties `x` and `y` that specify the new coordinates.
+	 *                 If not provided, the current instance's coordinates are used.
+	 * @return A new Position instance with the provided or existing coordinates.
+	 */
+	public clone(position?: {
+		readonly x?: Position.X
+		readonly y?: Position.Y
+	}): Position {
+		return new Position({ x: position?.x ?? this.x, y: position?.y ?? this.y })
+	}
+
+	/**
 	 * A function `X` that constructs a `Position.X` value.
 	 */
 	public static readonly X: (
