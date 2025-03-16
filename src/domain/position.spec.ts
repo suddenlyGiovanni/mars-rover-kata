@@ -4,6 +4,34 @@ import { describe, expect, it } from 'vitest'
 import { Position } from './position.ts'
 
 describe('Position', () => {
+	describe('X', () => {
+		it('should create a valid Position.X value', () => {
+			const xValue = Position.X(15)
+			expect(xValue).toBeDefined()
+			expect(typeof xValue).toBe('number') // Assuming Position.X wraps a number type
+			expect(xValue).toBe(15)
+		})
+
+		it('should throw an error for non-integer values', () => {
+			expect(() => Position.X('10' as unknown as number)).toThrow()
+			expect(() => Position.X(10.5)).toThrow()
+		})
+	})
+
+	describe('Y', () => {
+		it('should create a valid Position.Y value', () => {
+			const yValue = Position.Y(25)
+			expect(yValue).toBeDefined()
+			expect(typeof yValue).toBe('number') // Assuming Position.Y wraps a number type
+			expect(yValue).toBe(25)
+		})
+
+		it('should throw an error for non-integer values', () => {
+			expect(() => Position.Y(Number.NaN as unknown as number)).toThrow()
+			expect(() => Position.Y(20.5)).toThrow()
+		})
+	})
+
 	describe('.clone', () => {
 		const initialPosition = new Position({
 			x: Position.X(10),
