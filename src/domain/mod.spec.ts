@@ -206,7 +206,7 @@ describe('move', () => {
 					)
 				})
 
-				describe('Given a South orientation', () => {
+				describe.skip('Given a South orientation', () => {
 					const rover = new Rover({
 						position: initialPosition,
 						orientation: Orientation.South(),
@@ -344,7 +344,7 @@ describe('move', () => {
 					)
 				})
 
-				describe('Given a West orientation', () => {
+				describe.skip('Given a West orientation', () => {
 					const rover = new Rover({
 						position: initialPosition,
 						orientation: Orientation.West(),

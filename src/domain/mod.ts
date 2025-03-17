@@ -62,7 +62,17 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 							}),
 						South: () => hole(),
 						West: () => hole(),
-						Est: () => hole(),
+						Est: () =>
+							rover.clone({
+								position: rover.position.clone({
+									x: Position.X(
+										nonNegativeModulus(
+											Int.add(rover.position.x, Int.unit),
+											planet.size.width,
+										),
+									),
+								}),
+							}),
 					}),
 				),
 			GoBackward: () => hole(),
