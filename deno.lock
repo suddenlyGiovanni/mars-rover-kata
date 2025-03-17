@@ -3,6 +3,7 @@
   "specifiers": {
     "npm:@deno/vite-plugin@^1.0.4": "1.0.4_vite@6.2.2",
     "npm:effect@^3.13.11": "3.13.11",
+    "npm:vitest@*": "3.0.8_vite@6.2.2",
     "npm:vitest@3.0.8": "3.0.8_vite@6.2.2",
     "npm:vitest@^3.0.8": "3.0.8_vite@6.2.2"
   },

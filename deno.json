@@ -10,7 +10,7 @@
   },
   "tasks": {
 	"test": {
-	  "command": "deno run -A --inspect npm:vitest@3.0.8",
+	  "command": "deno run --cached-only -A npm:vitest@^3.0.8",
 	  "description": "Run the project tests with vitest"
 	}
   },
