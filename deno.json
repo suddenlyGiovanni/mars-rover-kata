@@ -3,7 +3,6 @@
   "license": "MIT",
   "nodeModulesDir": "auto",
   "compilerOptions": {
-	"lib": ["deno.ns"],
 	"types": [
 	  "vitest/importMeta"
 	]
