@@ -57,6 +57,7 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 						Est: () => rover.clone({ orientation: Orientation.North() }),
 					}),
 				),
+
 			TurnRight: () =>
 				pipe(
 					rover.orientation,
@@ -67,32 +68,45 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 						West: () => rover.clone({ orientation: Orientation.North() }),
 					}),
 				),
+
 			GoForward: () =>
 				pipe(
 					rover.orientation,
 					Orientation.$match({
 						North: () =>
-								rover.clone({
-									position: rover.position.clone({
-										y: wrapGridPosition(
-												Position.Y(Int.add(rover.position.y, Int.unit)),
-												planet.size.height,
-										),
-									}),
+							rover.clone({
+								position: rover.position.clone({
+									y: wrapGridPosition(
+										Position.Y(Int.add(rover.position.y, Int.unit)),
+										planet.size.height,
+									),
 								}),
-						South: () => hole(),
+							}),
+
+						South: () =>
+							rover.clone({
+								position: rover.position.clone({
+									y: wrapGridPosition(
+										Position.Y(Int.sub(rover.position.y, Int.unit)),
+										planet.size.height,
+									),
+								}),
+							}),
+
 						West: () => hole(),
+
 						Est: () =>
-								rover.clone({
-									position: rover.position.clone({
-										x: wrapGridPosition(
-												Position.X(Int.add(rover.position.x, Int.unit)),
-												planet.size.width,
-										),
-									}),
+							rover.clone({
+								position: rover.position.clone({
+									x: wrapGridPosition(
+										Position.X(Int.add(rover.position.x, Int.unit)),
+										planet.size.width,
+									),
 								}),
+							}),
 					}),
 				),
+
 			GoBackward: () => hole(),
 		}),
 	)
