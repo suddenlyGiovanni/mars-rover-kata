@@ -53,8 +53,11 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 					rover.orientation,
 					Orientation.$match({
 						North: () => rover.clone({ orientation: Orientation.West() }),
+
 						South: () => rover.clone({ orientation: Orientation.Est() }),
+
 						West: () => rover.clone({ orientation: Orientation.South() }),
+
 						Est: () => rover.clone({ orientation: Orientation.North() }),
 					}),
 				),
@@ -64,8 +67,11 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 					rover.orientation,
 					Orientation.$match({
 						North: () => rover.clone({ orientation: Orientation.Est() }),
+
 						Est: () => rover.clone({ orientation: Orientation.South() }),
+
 						South: () => rover.clone({ orientation: Orientation.West() }),
+
 						West: () => rover.clone({ orientation: Orientation.North() }),
 					}),
 				),
@@ -129,6 +135,7 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 									),
 								}),
 							}),
+
 						South: () =>
 							rover.clone({
 								position: rover.position.clone({
@@ -138,7 +145,17 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 									),
 								}),
 							}),
-						Est: () => rover.clone(),
+
+						Est: () =>
+							rover.clone({
+								position: rover.position.clone({
+									x: wrapGridPosition(
+										Position.X(Int.sub(rover.position.x, Int.unit)),
+										planet.size.width,
+									),
+								}),
+							}),
+
 						West: () => rover.clone(),
 					}),
 				),

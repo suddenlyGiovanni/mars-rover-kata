@@ -518,7 +518,7 @@ describe('move', () => {
 			)
 		})
 
-		describe.skip(`GIVEN a '${Orientation.Est()._tag}' orientation`, () => {
+		describe(`GIVEN a '${Orientation.Est()._tag}' orientation`, () => {
 			const orientation = Orientation.Est()
 			it.for([
 				{
@@ -550,7 +550,7 @@ describe('move', () => {
 					}),
 					expectedRover: new Rover({
 						orientation,
-						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
+						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
 				},
 
