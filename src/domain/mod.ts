@@ -1,6 +1,6 @@
 import { hole, pipe } from 'effect'
 
-import { Int } from '../types.ts'
+import { Int } from '../int.ts'
 import { Command } from './command.ts'
 import { Orientation } from './orientation.ts'
 import type { Planet } from './planet.ts'
