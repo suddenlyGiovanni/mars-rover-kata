@@ -585,7 +585,7 @@ describe('move', () => {
 			)
 		})
 
-		describe.skip(`GIVEN a '${Orientation.West()._tag}' orientation`, () => {
+		describe(`GIVEN a '${Orientation.West()._tag}' orientation`, () => {
 			const orientation = Orientation.West()
 
 			it.for([
