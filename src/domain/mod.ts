@@ -129,7 +129,15 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 									),
 								}),
 							}),
-						South: () => rover.clone(),
+						South: () =>
+							rover.clone({
+								position: rover.position.clone({
+									y: wrapGridPosition(
+										Position.Y(Int.add(rover.position.y, Int.unit)),
+										planet.size.height,
+									),
+								}),
+							}),
 						Est: () => rover.clone(),
 						West: () => rover.clone(),
 					}),
