@@ -1,5 +1,6 @@
 import { hole, pipe } from 'effect'
 
+import { rotate } from 'effect/Array'
 import { Int } from '../int.ts'
 import { Command } from './command.ts'
 import type { GridSize } from './grid-size.ts'
@@ -93,7 +94,15 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 								}),
 							}),
 
-						West: () => hole(),
+						West: () =>
+							rover.clone({
+								position: rover.position.clone({
+									x: wrapGridPosition(
+										Position.X(Int.sub(rover.position.x, Int.unit)),
+										planet.size.width,
+									),
+								}),
+							}),
 
 						Est: () =>
 							rover.clone({
