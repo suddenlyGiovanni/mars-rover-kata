@@ -86,7 +86,7 @@ describe('move', () => {
 		}),
 	})
 
-	describe('Should `TurnLeft`', () => {
+	describe(`Should '${Command.TurnLeft()._tag}'`, () => {
 		it.each([
 			{
 				initialOrientation: Orientation.North(),
@@ -107,24 +107,21 @@ describe('move', () => {
 		])(
 			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
 			({ initialOrientation, expectedNextOrientation }) => {
-				// act
-
-				const { orientation: actualOrientation } = move(
-					new Rover({
-						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
-						orientation: initialOrientation,
-					}),
-					planet,
-					Command.TurnLeft(),
-				)
-
-				// assert
-				expect(actualOrientation).toEqual(expectedNextOrientation)
+				expect(
+					move(
+						new Rover({
+							position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+							orientation: initialOrientation,
+						}),
+						planet,
+						Command.TurnLeft(),
+					).orientation,
+				).toEqual(expectedNextOrientation)
 			},
 		)
 	})
 
-	describe('Should `TurnRight`', () => {
+	describe(`Should '${Command.TurnRight()._tag}'`, () => {
 		it.each([
 			{
 				initialOrientation: Orientation.North(),
@@ -145,24 +142,21 @@ describe('move', () => {
 		])(
 			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
 			({ initialOrientation, expectedNextOrientation }) => {
-				// act
-
-				const { orientation: actualOrientation } = move(
-					new Rover({
-						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
-						orientation: initialOrientation,
-					}),
-					planet,
-					Command.TurnRight(),
-				)
-
-				// assert
-				expect(actualOrientation).toEqual(expectedNextOrientation)
+				expect(
+					move(
+						new Rover({
+							position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+							orientation: initialOrientation,
+						}),
+						planet,
+						Command.TurnRight(),
+					).orientation,
+				).toEqual(expectedNextOrientation)
 			},
 		)
 	})
 
-	describe('Should `GoForward`', () => {
+	describe(`Should '${Command.GoForward()._tag}'`, () => {
 		describe(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
 			const orientation = Orientation.North()
 			it.for([
@@ -411,7 +405,7 @@ describe('move', () => {
 		})
 	})
 
-	describe('Should GoBackward', () => {
+	describe(`Should '${Command.GoBackward()._tag}'`, () => {
 		describe.skip(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
 			const orientation = Orientation.North()
 			it.for([
@@ -462,7 +456,7 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					expect(
-						move(initialRover, planet, Command.GoForward()).position,
+						move(initialRover, planet, Command.GoBackward()).position,
 					).toEqual(expectedRover.position)
 				},
 			)
@@ -518,7 +512,7 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					expect(
-						move(initialRover, planet, Command.GoForward()).position,
+						move(initialRover, planet, Command.GoBackward()).position,
 					).toEqual(expectedRover.position)
 				},
 			)
@@ -585,7 +579,7 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					expect(
-						move(initialRover, planet, Command.GoForward()).position,
+						move(initialRover, planet, Command.GoBackward()).position,
 					).toEqual(expectedRover.position)
 				},
 			)
@@ -653,7 +647,7 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					expect(
-						move(initialRover, planet, Command.GoForward()).position,
+						move(initialRover, planet, Command.GoBackward()).position,
 					).toEqual(expectedRover.position)
 				},
 			)
