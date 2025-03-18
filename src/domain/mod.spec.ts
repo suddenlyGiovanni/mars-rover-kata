@@ -212,26 +212,9 @@ describe('move', () => {
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
-					const { position: actualPosition } = move(
-						initialRover,
-						planet,
-						Command.GoForward(),
-					)
-
-					/**
-					 *                   North
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,3]|     |     |     | 4,3 |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,2]|     |     |     |     |
-					 *   West  +-----+-----+-----+-----+-----+  Est
-					 *         |[0,1]|     |     |     |     |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,0]|     |     |     | 4,0 |
-					 *         +-----+-----+-----+-----+-----+
-					 *                   South
-					 */
-					expect(actualPosition).toEqual(expectedRover.position)
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -285,26 +268,9 @@ describe('move', () => {
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
-					const { position: actualPosition } = move(
-						initialRover,
-						planet,
-						Command.GoForward(),
-					)
-
-					/**
-					 *                   North
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,3]|     |     |     | 4,3 |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,2]|     |     |     |     |
-					 *   West  +-----+-----+-----+-----+-----+  Est
-					 *         |[0,1]|     |     |     |     |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,0]|     |     |     | 4,0 |
-					 *         +-----+-----+-----+-----+-----+
-					 *                   South
-					 */
-					expect(actualPosition).toEqual(expectedRover.position)
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -369,27 +335,9 @@ describe('move', () => {
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
-					const { position: actualPosition } = move(
-						initialRover,
-						planet,
-
-						Command.GoForward(),
-					)
-
-					/**
-					 *                   North
-					 *         +-----+-----+-----+-----+-----+
-					 *         |     |     |     |     | 4,3 |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |     |     |     |     |     |
-					 *   West  +-----+-----+-----+-----+-----+  Est
-					 *         |     |     |     |     |     |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,0]|[1,0]|[2,0]|[3,0]|[4,0]|
-					 *         +-----+-----+-----+-----+-----+
-					 *                   South
-					 */
-					expect(actualPosition).toEqual(expectedRover.position)
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -455,30 +403,260 @@ describe('move', () => {
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
-					const { position: actualPosition } = move(
-						initialRover,
-						planet,
-						Command.GoForward(),
-					)
-
-					/**
-					 *                   North
-					 *         +-----+-----+-----+-----+-----+
-					 *         |     |     |     |     | 4,3 |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |     |     |     |     |     |
-					 *   West  +-----+-----+-----+-----+-----+  Est
-					 *         |     |     |     |     |     |
-					 *         +-----+-----+-----+-----+-----+
-					 *         |[0,0]|[1,0]|[2,0]|[3,0]|[4,0]|
-					 *         +-----+-----+-----+-----+-----+
-					 *                   South
-					 */
-					expect(actualPosition).toEqual(expectedRover.position)
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
 				},
 			)
 		})
 	})
 
-	describe.todo('Should GoBackward')
+	describe('Should GoBackward', () => {
+		describe.skip(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
+			const orientation = Orientation.North()
+			it.for([
+				{
+					initialRover: new Rover({
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+						orientation,
+					}),
+					expectedRover: new Rover({
+						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
+						orientation,
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					}),
+				},
+			])(
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
+				({ initialRover, expectedRover }) => {
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
+				},
+			)
+		})
+
+		describe.skip(`GIVEN a '${Orientation.South()._tag}' orientation`, () => {
+			const orientation = Orientation.South()
+			it.for([
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					}),
+				},
+			])(
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
+				({ initialRover, expectedRover }) => {
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
+				},
+			)
+		})
+
+		describe.skip(`GIVEN a '${Orientation.Est()._tag}' orientation`, () => {
+			const orientation = Orientation.Est()
+			it.for([
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					}),
+				},
+			])(
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
+				({ initialRover, expectedRover }) => {
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
+				},
+			)
+		})
+
+		describe.skip(`GIVEN a '${Orientation.West()._tag}' orientation`, () => {
+			const orientation = Orientation.West()
+
+			it.for([
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
+					}),
+				},
+
+				{
+					initialRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
+					}),
+					expectedRover: new Rover({
+						orientation,
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					}),
+				},
+			])(
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
+				({ initialRover, expectedRover }) => {
+					expect(
+						move(initialRover, planet, Command.GoForward()).position,
+					).toEqual(expectedRover.position)
+				},
+			)
+		})
+	})
 })
