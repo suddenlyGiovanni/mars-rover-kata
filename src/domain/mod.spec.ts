@@ -2,11 +2,65 @@ import { describe, expect, it } from 'vitest'
 
 import { Command } from './command.ts'
 import { GridSize } from './grid-size.ts'
-import { move } from './mod.ts'
+import { move, wrapGridPosition } from './mod.ts'
 import { Orientation } from './orientation.ts'
 import { Planet } from './planet.ts'
 import { Position } from './position.ts'
 import { Rover } from './rover.ts'
+
+describe('wrapGridPosition', () => {
+	// Define common grid sizes for tests
+	const width5 = GridSize.Width(5)
+	const height4 = GridSize.Height(4)
+
+	describe('with X coordinates', () => {
+		it('leaves valid positions unchanged', () => {
+			expect(wrapGridPosition(Position.X(0), width5)).toEqual(Position.X(0))
+			expect(wrapGridPosition(Position.X(3), width5)).toEqual(Position.X(3))
+			expect(wrapGridPosition(Position.X(4), width5)).toEqual(Position.X(4))
+		})
+
+		it('wraps positions at grid boundary', () => {
+			expect(wrapGridPosition(Position.X(5), width5)).toEqual(Position.X(0))
+			expect(wrapGridPosition(Position.X(10), width5)).toEqual(Position.X(0))
+		})
+
+		it('wraps positions beyond grid boundary', () => {
+			expect(wrapGridPosition(Position.X(6), width5)).toEqual(Position.X(1))
+			expect(wrapGridPosition(Position.X(9), width5)).toEqual(Position.X(4))
+		})
+
+		it('correctly wraps negative positions', () => {
+			expect(wrapGridPosition(Position.X(-1), width5)).toEqual(Position.X(4))
+			expect(wrapGridPosition(Position.X(-5), width5)).toEqual(Position.X(0))
+			expect(wrapGridPosition(Position.X(-6), width5)).toEqual(Position.X(4))
+		})
+	})
+
+	describe('with Y coordinates', () => {
+		it('leaves valid positions unchanged', () => {
+			expect(wrapGridPosition(Position.Y(0), height4)).toEqual(Position.Y(0))
+			expect(wrapGridPosition(Position.Y(2), height4)).toEqual(Position.Y(2))
+			expect(wrapGridPosition(Position.Y(3), height4)).toEqual(Position.Y(3))
+		})
+
+		it('wraps positions at grid boundary', () => {
+			expect(wrapGridPosition(Position.Y(4), height4)).toEqual(Position.Y(0))
+			expect(wrapGridPosition(Position.Y(8), height4)).toEqual(Position.Y(0))
+		})
+
+		it('wraps positions beyond grid boundary', () => {
+			expect(wrapGridPosition(Position.Y(5), height4)).toEqual(Position.Y(1))
+			expect(wrapGridPosition(Position.Y(7), height4)).toEqual(Position.Y(3))
+		})
+
+		it('correctly wraps negative positions', () => {
+			expect(wrapGridPosition(Position.Y(-1), height4)).toEqual(Position.Y(3))
+			expect(wrapGridPosition(Position.Y(-4), height4)).toEqual(Position.Y(0))
+			expect(wrapGridPosition(Position.Y(-5), height4)).toEqual(Position.Y(3))
+		})
+	})
+})
 
 /**
  * GIVEN the following Planet with GridSize of 4*3
@@ -32,7 +86,10 @@ describe('move', () => {
 		})
 		const planet = new Planet({ size })
 
-		const initialPosition = new Position({ x: Position.X(0), y: Position.Y(0) })
+		const initialPosition = new Position({
+			x: Position.X(0),
+			y: Position.Y(0),
+		})
 		const initialOrientation = Orientation.North()
 
 		const rover = new Rover({
@@ -113,7 +170,10 @@ describe('move', () => {
 		})
 		const planet = new Planet({ size })
 
-		const initialPosition = new Position({ x: Position.X(0), y: Position.Y(0) })
+		const initialPosition = new Position({
+			x: Position.X(0),
+			y: Position.Y(0),
+		})
 		const initialOrientation = Orientation.North()
 
 		const rover = new Rover({

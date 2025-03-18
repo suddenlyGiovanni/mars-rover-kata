@@ -2,20 +2,42 @@ import { hole, pipe } from 'effect'
 
 import { Int } from '../int.ts'
 import { Command } from './command.ts'
+import type { GridSize } from './grid-size.ts'
 import { Orientation } from './orientation.ts'
 import type { Planet } from './planet.ts'
 import { Position } from './position.ts'
 import type { Rover } from './rover.ts'
 
 /**
- * Calculates the modulus of two integers, ensuring the result is always non-negative.
+ * Wraps a position coordinate around grid boundaries (pacman effect).
  *
- * @param dividend - The number to be divided.
- * @param divisor - The number by which the dividend is divided.
- * @return The non-negative remainder of the division operation.
+ * This function handles the wrapping behavior when a position exceeds the grid limits
+ * or becomes negative. It ensures the position always stays within the valid grid range
+ * by wrapping it to the opposite edge when necessary.
+ *
+ * For example:
+ * - If position = 5 and gridSize = 5, returns 0 (wraps to beginning)
+ * - If position = -1 and gridSize = 5, returns 4 (wraps to end)
+ *
+ * @typeParam P - The type of position coordinate (Position.X or Position.Y)
+ * @param position - The position coordinate to wrap
+ * @param gridSize - The grid boundary size (width or height)
+ * @returns The wrapped position coordinate of the same type as input
+ *
+ * @example
+ * ```ts
+ * // Wrap X position 5 in a grid of width 5 (returns 0)
+ * const wrappedX = wrapGridPosition(Position.X(5), GridSize.Width(5));
+ *
+ * // Wrap Y position -1 in a grid of height 4 (returns 3)
+ * const wrappedY = wrapGridPosition(Position.Y(-1), GridSize.Height(4));
+ * ```
  */
-function nonNegativeModulus(dividend: Int.Type, divisor: Int.Type): Int.Type {
-	return Int.make(Math.abs(dividend % divisor))
+export function wrapGridPosition<P extends Position.X | Position.Y>(
+	position: P,
+	gridSize: GridSize.Height | GridSize.Width,
+): P {
+	return Int.modulus(position, gridSize) as P
 }
 
 /**
@@ -50,24 +72,24 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 					rover.orientation,
 					Orientation.$match({
 						North: () =>
-							rover.clone({
-								position: rover.position.clone({
-									y: Position.Y(
-										nonNegativeModulus(
-											Int.add(rover.position.y, Int.unit),
-											planet.size.height,
+								rover.clone({
+									position: rover.position.clone({
+										y: Position.Y(
+												wrapGridPosition(
+														Position.Y(Int.add(rover.position.y, Int.unit)),
+														planet.size.height,
+												),
 										),
-									),
+									}),
 								}),
-							}),
 						South: () => hole(),
 						West: () => hole(),
 						Est: () =>
 							rover.clone({
 								position: rover.position.clone({
 									x: Position.X(
-										nonNegativeModulus(
-											Int.add(rover.position.x, Int.unit),
+										wrapGridPosition(
+											Position.X(Int.add(rover.position.x, Int.unit)),
 											planet.size.width,
 										),
 									),
