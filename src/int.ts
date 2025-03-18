@@ -24,6 +24,29 @@ export class Int extends Schema.Int.pipe(Schema.brand('Int')) {
 	}
 
 	/**
+	 * Calculates the mathematical modulus of two integers, ensuring the result is always non-negative.
+	 *
+	 * Unlike JavaScript's native % operator which returns negative results for negative dividends,
+	 * this implementation always returns a non-negative result in the range [0, divisor-1].
+	 * This is equivalent to the mathematical modulo operation.
+	 *
+	 * Formula: ((dividend % divisor) + divisor) % divisor
+	 *
+	 * @param dividend - The integer being divided
+	 * @param divisor - The integer by which the dividend is divided
+	 * @returns A non-negative integer representing the remainder in the range [0, divisor-1]
+	 *
+	 * @example
+	 * ```ts
+	 * Int.modulus(Int.make(7), Int.make(5)) // Returns Int.make(2)
+	 * Int.modulus(Int.make(-1), Int.make(5)) // Returns Int.make(4) instead of -1
+	 * ```
+	 */
+	public static modulus(dividend: Int.Type, divisor: Int.Type): Int.Type {
+		return Int.make(((dividend % divisor) + divisor) % divisor)
+	}
+
+	/**
 	 * Represents a unit value of type `Int`.
 	 *
 	 * The `unit` variable is initialized using the `Int.make` function
