@@ -105,7 +105,7 @@ describe('move', () => {
 				expectedNextOrientation: Orientation.North(),
 			},
 		])(
-			'Given the initial orientation $initialOrientation._tag should return $expectedNextOrientation._tag',
+			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
 			({ initialOrientation, expectedNextOrientation }) => {
 				// act
 
@@ -143,7 +143,7 @@ describe('move', () => {
 				expectedNextOrientation: Orientation.North(),
 			},
 		])(
-			'Given the initial orientation $initialOrientation._tag should return $expectedNextOrientation._tag',
+			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
 			({ initialOrientation, expectedNextOrientation }) => {
 				// act
 
@@ -163,10 +163,9 @@ describe('move', () => {
 	})
 
 	describe('Should `GoForward`', () => {
-		describe('Given a North orientation', () => {
+		describe(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
 			const orientation = Orientation.North()
-
-			it.each([
+			it.for([
 				{
 					initialRover: new Rover({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
@@ -211,7 +210,7 @@ describe('move', () => {
 					}),
 				},
 			])(
-				'Given the initial position `[$initial.position.x,$initial.position.y]`, it should move to `[$expected.position.x,$expected.position.y]`',
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					const { position: actualPosition } = move(
 						initialRover,
@@ -237,10 +236,9 @@ describe('move', () => {
 			)
 		})
 
-		describe.skip('Given a `South` orientation', () => {
+		describe.skip(`GIVEN a '${Orientation.South()._tag}' orientation`, () => {
 			const orientation = Orientation.South()
-
-			it.each([
+			it.for([
 				{
 					initialRover: new Rover({
 						orientation,
@@ -285,7 +283,7 @@ describe('move', () => {
 					}),
 				},
 			])(
-				'Given the initial position `[$initial.position.x,$initial.position.y]`, it should move to `[$expected.position.x,$expected.position.y]`',
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					const { position: actualPosition } = move(
 						initialRover,
@@ -311,10 +309,9 @@ describe('move', () => {
 			)
 		})
 
-		describe('Given a Est orientation', () => {
+		describe(`GIVEN a '${Orientation.Est()._tag}' orientation`, () => {
 			const orientation = Orientation.Est()
-
-			it.each([
+			it.for([
 				{
 					initialRover: new Rover({
 						orientation,
@@ -342,7 +339,6 @@ describe('move', () => {
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
-
 					expectedRover: new Rover({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
@@ -371,11 +367,12 @@ describe('move', () => {
 					}),
 				},
 			])(
-				'Given the initial position `[$initial.position.x,$initial.position.y]`, it should move to `[$expected.position.x,$expected.position.y]`',
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					const { position: actualPosition } = move(
 						initialRover,
 						planet,
+
 						Command.GoForward(),
 					)
 
@@ -397,10 +394,10 @@ describe('move', () => {
 			)
 		})
 
-		describe.skip('Given a West orientation', () => {
+		describe.skip(`GIVEN a '${Orientation.West()._tag}' orientation`, () => {
 			const orientation = Orientation.West()
 
-			it.each([
+			it.for([
 				{
 					initialRover: new Rover({
 						orientation,
@@ -456,7 +453,7 @@ describe('move', () => {
 					}),
 				},
 			])(
-				'Given the initial position `[$initial.position.x,$initial.position.y]`, it should move to `[$expected.position.x,$expected.position.y]`',
+				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				({ initialRover, expectedRover }) => {
 					const { position: actualPosition } = move(
 						initialRover,
