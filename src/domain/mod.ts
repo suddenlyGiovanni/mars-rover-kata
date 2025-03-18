@@ -74,27 +74,23 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 						North: () =>
 								rover.clone({
 									position: rover.position.clone({
-										y: Position.Y(
-												wrapGridPosition(
-														Position.Y(Int.add(rover.position.y, Int.unit)),
-														planet.size.height,
-												),
+										y: wrapGridPosition(
+												Position.Y(Int.add(rover.position.y, Int.unit)),
+												planet.size.height,
 										),
 									}),
 								}),
 						South: () => hole(),
 						West: () => hole(),
 						Est: () =>
-							rover.clone({
-								position: rover.position.clone({
-									x: Position.X(
-										wrapGridPosition(
-											Position.X(Int.add(rover.position.x, Int.unit)),
-											planet.size.width,
+								rover.clone({
+									position: rover.position.clone({
+										x: wrapGridPosition(
+												Position.X(Int.add(rover.position.x, Int.unit)),
+												planet.size.width,
 										),
-									),
+									}),
 								}),
-							}),
 					}),
 				),
 			GoBackward: () => hole(),
