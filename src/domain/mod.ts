@@ -116,7 +116,24 @@ export function move(rover: Rover, planet: Planet, command: Command): Rover {
 					}),
 				),
 
-			GoBackward: () => hole(),
+			GoBackward: () =>
+				pipe(
+					rover.orientation,
+					Orientation.$match({
+						North: () =>
+							rover.clone({
+								position: rover.position.clone({
+									y: wrapGridPosition(
+										Position.Y(Int.sub(rover.position.y, Int.unit)),
+										planet.size.height,
+									),
+								}),
+							}),
+						South: () => rover.clone(),
+						Est: () => rover.clone(),
+						West: () => rover.clone(),
+					}),
+				),
 		}),
 	)
 }

@@ -406,7 +406,7 @@ describe('move', () => {
 	})
 
 	describe(`Should '${Command.GoBackward()._tag}'`, () => {
-		describe.skip(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
+		describe(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
 			const orientation = Orientation.North()
 			it.for([
 				{
