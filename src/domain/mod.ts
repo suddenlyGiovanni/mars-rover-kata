@@ -1,4 +1,4 @@
-import { pipe } from 'effect'
+import { Data, Effect, HashSet, hole, pipe } from 'effect'
 
 import { Int } from '../int.ts'
 import { Command } from './command.ts'
@@ -40,10 +40,20 @@ export function wrapGridPosition<P extends Position.X | Position.Y>(
 	return Int.modulus(position, gridSize) as P
 }
 
+export function move(
+	rover: Rover,
+	planet: Planet,
+	command: Command,
+): Effect.Effect<Rover> {
+	const nextRover: Rover = nextMove(rover, planet, command)
+
+	return Effect.succeed(nextRover)
+}
+
 /**
  *  Implement wrapping from one edge of the grid to another (pacman effect).
  */
-export function move(rover: Rover, planet: Planet, command: Command): Rover {
+function nextMove(rover: Rover, planet: Planet, command: Command): Rover {
 	return pipe(
 		command,
 		Command.$match({

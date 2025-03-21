@@ -1,3 +1,4 @@
+import { Effect } from 'effect'
 import { describe, expect, it } from 'vitest'
 
 import { Command } from './command.ts'
@@ -106,8 +107,8 @@ describe('move', () => {
 			},
 		])(
 			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
-			({ initialOrientation, expectedNextOrientation }) => {
-				expect(
+			async ({ initialOrientation, expectedNextOrientation }) => {
+				const { orientation } = await Effect.runPromise(
 					move(
 						new Rover({
 							position: new Position({ x: Position.X(0), y: Position.Y(0) }),
@@ -115,8 +116,9 @@ describe('move', () => {
 						}),
 						planet,
 						Command.TurnLeft(),
-					).orientation,
-				).toEqual(expectedNextOrientation)
+					),
+				)
+				expect(orientation).toEqual(expectedNextOrientation)
 			},
 		)
 	})
@@ -141,8 +143,8 @@ describe('move', () => {
 			},
 		])(
 			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
-			({ initialOrientation, expectedNextOrientation }) => {
-				expect(
+			async ({ initialOrientation, expectedNextOrientation }) => {
+				const { orientation } = await Effect.runPromise(
 					move(
 						new Rover({
 							position: new Position({ x: Position.X(0), y: Position.Y(0) }),
@@ -150,8 +152,9 @@ describe('move', () => {
 						}),
 						planet,
 						Command.TurnRight(),
-					).orientation,
-				).toEqual(expectedNextOrientation)
+					),
+				)
+				expect(orientation).toEqual(expectedNextOrientation)
 			},
 		)
 	})
@@ -205,10 +208,11 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoForward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					const { position } = await Effect.runPromise(
+						move(initialRover, planet, Command.GoForward()),
+					)
+					expect(position).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -261,10 +265,11 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoForward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					const { position } = await Effect.runPromise(
+						move(initialRover, planet, Command.GoForward()),
+					)
+					expect(position).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -328,10 +333,12 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoForward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					const { position } = await Effect.runPromise(
+						move(initialRover, planet, Command.GoForward()),
+					)
+
+					expect(position).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -396,10 +403,11 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoForward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					const { position } = await Effect.runPromise(
+						move(initialRover, planet, Command.GoForward()),
+					)
+					expect(position).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -454,10 +462,11 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoBackward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					const { position } = await Effect.runPromise(
+						move(initialRover, planet, Command.GoBackward()),
+					)
+					expect(position).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -510,10 +519,10 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoBackward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					await expect(
+						Effect.runPromise(move(initialRover, planet, Command.GoBackward())),
+					).resolves.toMatchObject({ position: expectedRover.position })
 				},
 			)
 		})
@@ -577,10 +586,11 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoBackward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					const { position } = await Effect.runPromise(
+						move(initialRover, planet, Command.GoBackward()),
+					)
+					expect(position).toEqual(expectedRover.position)
 				},
 			)
 		})
@@ -645,10 +655,11 @@ describe('move', () => {
 				},
 			])(
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
-				({ initialRover, expectedRover }) => {
-					expect(
-						move(initialRover, planet, Command.GoBackward()).position,
-					).toEqual(expectedRover.position)
+				async ({ initialRover, expectedRover }) => {
+					const { position } = await Effect.runPromise(
+						move(initialRover, planet, Command.GoBackward()),
+					)
+					expect(position).toEqual(expectedRover.position)
 				},
 			)
 		})
