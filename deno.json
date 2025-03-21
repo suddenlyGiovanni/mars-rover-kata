@@ -9,14 +9,14 @@
   },
   "tasks": {
 	"test": {
-	  "command": "deno run --cached-only -A --inspect npm:vitest@^3.0.8 --no-file-parallelism",
+	  "command": "deno run --cached-only -A --inspect npm:vitest@3.0.9 --no-file-parallelism",
 	  "description": "Run the project tests with vitest"
 	}
   },
   "imports": {
-    "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
-    "effect": "npm:effect@^3.13.11",
-    "vitest": "npm:vitest@^3.0.8"
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@1.0.4",
+    "effect": "npm:effect@3.14.1",
+    "vitest": "npm:vitest@3.0.9"
   },
   "lint": {
 	"rules": {
