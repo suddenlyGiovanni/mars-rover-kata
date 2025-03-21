@@ -1,4 +1,4 @@
-import { Effect } from 'effect'
+import { Effect, HashSet } from 'effect'
 import { describe, expect, it } from 'vitest'
 
 import { Command } from './command.ts'
@@ -85,6 +85,7 @@ describe('move', () => {
 			width: GridSize.Width(5),
 			height: GridSize.Height(4),
 		}),
+		obstacles: HashSet.make<Position[]>(),
 	})
 
 	describe(`Should '${Command.TurnLeft()._tag}'`, () => {

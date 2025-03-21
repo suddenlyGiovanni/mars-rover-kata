@@ -1,4 +1,4 @@
-import { Data, Effect, HashSet, hole, pipe } from 'effect'
+import { Data, Effect, HashSet, pipe } from 'effect'
 
 import { Int } from '../int.ts'
 import { Command } from './command.ts'
@@ -40,12 +40,25 @@ export function wrapGridPosition<P extends Position.X | Position.Y>(
 	return Int.modulus(position, gridSize) as P
 }
 
+export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
+	readonly obstaclePosition: Position
+	readonly roverPosition: Position
+}> {}
+
 export function move(
 	rover: Rover,
 	planet: Planet,
 	command: Command,
-): Effect.Effect<Rover> {
+): Effect.Effect<Rover, CollisionDetected> {
 	const nextRover: Rover = nextMove(rover, planet, command)
+	if (HashSet.has(planet.obstacles, nextRover.position)) {
+		return Effect.fail(
+			new CollisionDetected({
+				obstaclePosition: nextRover.position,
+				roverPosition: rover.position,
+			}),
+		)
+	}
 
 	return Effect.succeed(nextRover)
 }

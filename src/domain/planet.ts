@@ -1,5 +1,7 @@
-import { Data } from 'effect'
+import { Data, type HashSet } from 'effect'
+
 import type { GridSize } from './grid-size.ts'
+import type { Position } from './position.ts'
 
 /**
  * Represents a planet with specific size.
@@ -22,4 +24,5 @@ import type { GridSize } from './grid-size.ts'
  */
 export class Planet extends Data.TaggedClass('Planet')<{
 	readonly size: GridSize
+	readonly obstacles: HashSet.HashSet<Position>
 }> {}
