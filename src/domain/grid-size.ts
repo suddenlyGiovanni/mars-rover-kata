@@ -39,6 +39,13 @@ export class GridSize extends Data.TaggedClass('GridSize')<{
 	readonly height: GridSize.Height
 }> {
 	/**
+	 * Height constructor
+	 */
+	public static readonly Height: (
+		int: number,
+		options?: Schema.MakeOptions,
+	) => GridSize.Height = Height.make
+	/**
 	 * Width constructor
 	 */
 	public static readonly Width: (
@@ -47,10 +54,49 @@ export class GridSize extends Data.TaggedClass('GridSize')<{
 	) => GridSize.Width = Width.make
 
 	/**
-	 * Height constructor
+	 * Creates a new instance of GridSize, optionally modifying its width and/or height properties.
+	 *
+	 * @param gridSize - An optional object specifying new width and/or height values for the cloned GridSize.
+	 *                   - width: The new width value. If not provided, the width of the current instance is used.
+	 *                   - height: The new height value. If not provided, the height of the current instance is used.
+	 * @return A new GridSize instance with the specified or existing width and height values.
+	 *
+	 * @example
+	 * ```ts
+	 * // Create initial GridSize instance
+	 * const grid = new GridSize({
+	 *   width: GridSize.Width(5),
+	 *   height: GridSize.Height(4)
+	 * });
+	 *
+	 * // Clone with no changes (creates exact copy)
+	 * const copy = grid.clone();
+	 *
+	 * // Clone with new width only
+	 * const wider = grid.clone({ width: GridSize.Width(10) });
+	 *
+	 * // Clone with new height only
+	 * const taller = grid.clone({ height: GridSize.Height(8) });
+	 *
+	 * // Clone with both new width and height
+	 * const bigger = grid.clone({
+	 *   width: GridSize.Width(10),
+	 *   height: GridSize.Height(8)
+	 * });
+	 * ```
 	 */
-	public static readonly Height: (
-		int: number,
-		options?: Schema.MakeOptions,
-	) => GridSize.Height = Height.make
+	public clone(gridSize?: {
+		readonly width?: GridSize.Width
+		readonly height?: GridSize.Height
+	}): GridSize {
+		return gridSize
+			? new GridSize({
+					width: gridSize.width ? gridSize.width : this.width,
+					height: gridSize.height ? gridSize.height : this.height,
+				})
+			: new GridSize({
+					width: this.width,
+					height: this.height,
+				})
+	}
 }
