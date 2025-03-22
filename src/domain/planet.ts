@@ -25,4 +25,27 @@ import type { Position } from './position.ts'
 export class Planet extends Data.TaggedClass('Planet')<{
 	readonly size: GridSize
 	readonly obstacles: HashSet.HashSet<Position>
-}> {}
+}> {
+	/**
+	 * Creates a copy of the current Planet instance with the option to override certain properties.
+	 *
+	 * @param planet Optional parameter to specify properties for the cloned Planet instance.
+	 *        - size: An optional partial GridSize object to override the size of the Planet.
+	 *        - obstacles: An optional HashSet of Position objects to override the obstacles of the Planet.
+	 * @return A new Planet instance based on the current one with optional overridden properties applied.
+	 */
+	public clone(planet?: {
+		size?: Partial<GridSize>
+		obstacles?: HashSet.HashSet<Position>
+	}): Planet {
+		return planet
+			? new Planet({
+					size: planet.size ? this.size.clone(planet.size) : this.size,
+					obstacles: planet.obstacles ? planet.obstacles : this.obstacles,
+				})
+			: new Planet({
+					size: this.size,
+					obstacles: this.obstacles,
+				})
+	}
+}
