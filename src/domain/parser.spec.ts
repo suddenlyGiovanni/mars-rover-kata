@@ -1,10 +1,10 @@
 import { describe, expect, it } from '@effect/vitest'
-import { Effect, HashSet } from 'effect'
+import { Effect, Exit, HashSet } from 'effect'
 
 import { Command } from './command.ts'
 import { GridSize } from './grid-size.ts'
 import { Orientation } from './orientation.ts'
-import { move, wrapGridPosition } from './parser.ts'
+import { CollisionDetected, move, wrapGridPosition } from './parser.ts'
 import { Planet } from './planet.ts'
 import { Position } from './position.ts'
 import { Rover } from './rover.ts'
@@ -161,6 +161,8 @@ describe('move', () => {
 	})
 
 	describe(`Should '${Command.GoForward()._tag}'`, () => {
+		const command = Command.GoForward()
+
 		describe(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
 			const orientation = Orientation.North()
 			it.for([
@@ -211,15 +213,57 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					const { position } = await Effect.runPromise(
-						move(initialRover, planet, Command.GoForward()),
+						move(initialRover, planet, command),
 					)
 					expect(position).toEqual(expectedRover.position)
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(1),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 
 		describe(`GIVEN a '${Orientation.South()._tag}' orientation`, () => {
 			const orientation = Orientation.South()
+
 			it.for([
 				{
 					initialRover: new Rover({
@@ -268,15 +312,57 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					const { position } = await Effect.runPromise(
-						move(initialRover, planet, Command.GoForward()),
+						move(initialRover, planet, command),
 					)
 					expect(position).toEqual(expectedRover.position)
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(3),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 
 		describe(`GIVEN a '${Orientation.Est()._tag}' orientation`, () => {
 			const orientation = Orientation.Est()
+
 			it.for([
 				{
 					initialRover: new Rover({
@@ -336,12 +422,53 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					const { position } = await Effect.runPromise(
-						move(initialRover, planet, Command.GoForward()),
+						move(initialRover, planet, command),
 					)
 
 					expect(position).toEqual(expectedRover.position)
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(4),
+								y: Position.Y(0),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 
 		describe(`GIVEN a '${Orientation.West()._tag}' orientation`, () => {
@@ -406,15 +533,58 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					const { position } = await Effect.runPromise(
-						move(initialRover, planet, Command.GoForward()),
+						move(initialRover, planet, command),
 					)
 					expect(position).toEqual(expectedRover.position)
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(4),
+								y: Position.Y(0),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 	})
 
 	describe(`Should '${Command.GoBackward()._tag}'`, () => {
+		const command = Command.GoBackward()
+
 		describe(`GIVEN a '${Orientation.North()._tag}' orientation`, () => {
 			const orientation = Orientation.North()
 			it.for([
@@ -465,15 +635,57 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					const { position } = await Effect.runPromise(
-						move(initialRover, planet, Command.GoBackward()),
+						move(initialRover, planet, command),
 					)
 					expect(position).toEqual(expectedRover.position)
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(3),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 
 		describe(`GIVEN a '${Orientation.South()._tag}' orientation`, () => {
 			const orientation = Orientation.South()
+
 			it.for([
 				{
 					initialRover: new Rover({
@@ -522,14 +734,56 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					await expect(
-						Effect.runPromise(move(initialRover, planet, Command.GoBackward())),
+						Effect.runPromise(move(initialRover, planet, command)),
 					).resolves.toMatchObject({ position: expectedRover.position })
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(3),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 
 		describe(`GIVEN a '${Orientation.Est()._tag}' orientation`, () => {
 			const orientation = Orientation.Est()
+
 			it.for([
 				{
 					initialRover: new Rover({
@@ -589,11 +843,52 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					const { position } = await Effect.runPromise(
-						move(initialRover, planet, Command.GoBackward()),
+						move(initialRover, planet, command),
 					)
 					expect(position).toEqual(expectedRover.position)
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(4),
+								y: Position.Y(0),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 
 		describe(`GIVEN a '${Orientation.West()._tag}' orientation`, () => {
@@ -658,11 +953,52 @@ describe('move', () => {
 				'GIVEN ($initialRover.position.x, $initialRover.position.y) position, it SHOULD return ($expectedRover.position.x, $expectedRover.position.y)',
 				async ({ initialRover, expectedRover }) => {
 					const { position } = await Effect.runPromise(
-						move(initialRover, planet, Command.GoBackward()),
+						move(initialRover, planet, command),
 					)
 					expect(position).toEqual(expectedRover.position)
 				},
 			)
+
+			describe('GIVEN an obstacle on its path', () => {
+				it.effect(
+					`SHOULD return an "${CollisionDetected.name}" error`,
+					({ expect }) =>
+						Effect.gen(function* () {
+							const initialRoverPosition = new Position({
+								x: Position.X(4),
+								y: Position.Y(0),
+							})
+
+							const initialRover = new Rover({
+								position: initialRoverPosition,
+								orientation,
+							})
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(
+								move(
+									initialRover,
+									planet.clone({ obstacles: HashSet.make(obstaclePosition) }),
+									command,
+								),
+							)
+
+							expect(result).toStrictEqual(
+								Exit.fail(
+									new CollisionDetected({
+										obstaclePosition: obstaclePosition,
+										roverPosition: initialRoverPosition,
+									}),
+								),
+							)
+						}),
+				)
+			})
 		})
 	})
 })
