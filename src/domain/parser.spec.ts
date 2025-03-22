@@ -1,5 +1,5 @@
+import { describe, expect, it } from '@effect/vitest'
 import { Effect, HashSet } from 'effect'
-import { describe, expect, it } from 'vitest'
 
 import { Command } from './command.ts'
 import { GridSize } from './grid-size.ts'

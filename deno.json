@@ -15,6 +15,7 @@
   },
   "imports": {
     "@deno/vite-plugin": "npm:@deno/vite-plugin@1.0.4",
+    "@effect/vitest": "npm:@effect/vitest@^0.20.1",
     "effect": "npm:effect@3.14.1",
     "vitest": "npm:vitest@3.0.9"
   },
