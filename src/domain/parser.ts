@@ -1,4 +1,14 @@
-import { Data, Effect, HashSet, pipe } from 'effect'
+import {
+	type Array,
+	Data,
+	Effect,
+	Either,
+	HashSet,
+	Option,
+	Ref,
+	hole,
+	pipe,
+} from 'effect'
 
 import { Command } from './command.ts'
 import type { GridSize } from './grid-size.ts'
@@ -44,6 +54,42 @@ export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
 	readonly obstaclePosition: Position
 	readonly roverPosition: Position
 }> {}
+
+export function processBatch(
+	rover: Rover,
+	planet: Planet,
+	commands: Array.NonEmptyReadonlyArray<Command>,
+): Effect.Effect<
+	readonly [
+		lastRoverState: Rover,
+		maybeCollisionDetected: Option.Option<CollisionDetected>,
+	]
+> {
+	return Effect.gen(function* () {
+		let lastRoverState: Rover = rover
+
+		for (const command of commands) {
+			const nextState = yield* Effect.either(
+				move(lastRoverState, planet, command),
+			)
+
+			if (Either.isLeft(nextState)) {
+				return yield* Effect.succeed([
+					lastRoverState,
+					Option.some(nextState.left),
+				] as const)
+			}
+			if (Either.isRight(nextState)) {
+				lastRoverState = nextState.right
+			}
+		}
+
+		return yield* Effect.succeed([
+			lastRoverState,
+			Option.none<CollisionDetected>(),
+		] as const)
+	})
+}
 
 export function move(
 	rover: Rover,
