@@ -1,6 +1,6 @@
 import { Data, Schema } from 'effect'
 
-import { Int } from '../int.ts'
+import { Int } from './int.ts'
 
 const X = Int.pipe(Schema.brand('X'))
 const Y = Int.pipe(Schema.brand('Y'))

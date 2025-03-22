@@ -1,6 +1,6 @@
 import { Data, Schema } from 'effect'
 
-import { Int } from '../int.ts'
+import { Int } from './int.ts'
 
 const Width = Int.pipe(Schema.brand('Width'))
 const Height = Int.pipe(Schema.brand('Height'))

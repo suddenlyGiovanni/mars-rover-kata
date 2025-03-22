@@ -1,8 +1,8 @@
 import { Data, Effect, HashSet, pipe } from 'effect'
 
-import { Int } from '../int.ts'
 import { Command } from './command.ts'
 import type { GridSize } from './grid-size.ts'
+import { Int } from './int.ts'
 import { Orientation } from './orientation.ts'
 import type { Planet } from './planet.ts'
 import { Position } from './position.ts'
