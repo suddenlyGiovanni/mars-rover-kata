@@ -67,26 +67,26 @@ export function processBatch(
 	]
 > {
 	return Effect.gen(function* () {
-		let lastRoverState: Rover = rover
+		const roverRef = yield* Ref.make(rover)
 
 		for (const command of commands) {
 			const nextState = yield* Effect.either(
-				move(lastRoverState, planet, command),
+				move(yield* Ref.get(roverRef), planet, command),
 			)
 
 			if (Either.isLeft(nextState)) {
 				return yield* Effect.succeed([
-					lastRoverState,
+					yield* Ref.get(roverRef),
 					Option.some(nextState.left),
 				] as const)
 			}
 			if (Either.isRight(nextState)) {
-				lastRoverState = nextState.right
+				yield* Ref.set(roverRef, nextState.right)
 			}
 		}
 
 		return yield* Effect.succeed([
-			lastRoverState,
+			yield* Ref.get(roverRef),
 			Option.none<CollisionDetected>(),
 		] as const)
 	})
