@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
+
 import { Orientation } from './orientation.ts'
 import { Position } from './position.ts'
-import { Rover } from './rover.ts'
+import { RoverState } from './rover-state.ts'
 
 describe('Rover', () => {
 	describe('.clone', () => {
@@ -11,7 +12,7 @@ describe('Rover', () => {
 		})
 
 		const originalOrientation = Orientation.North()
-		const originalRover = new Rover({
+		const originalRover = new RoverState({
 			position: originalPosition,
 			orientation: originalOrientation,
 		})

@@ -9,7 +9,7 @@ import type { Position } from './position.ts'
  * @template `position` - The current position of the rover in the environment.
  * @template `orientation` - The direction the rover is facing.
  */
-export class Rover extends Data.TaggedClass('Rover')<{
+export class RoverState extends Data.TaggedClass('RoverState')<{
 	readonly position: Position
 	readonly orientation: Orientation
 }> {
@@ -17,22 +17,25 @@ export class Rover extends Data.TaggedClass('Rover')<{
 	 * Creates a new Rover instance that is a clone of the current instance,
 	 * optionally overriding position and orientation with provided values.
 	 *
-	 * @param params An object containing optional properties to override the clone behavior.
 	 * @param params.position The optional new position to apply to the cloned Rover.
 	 * @param params.orientation The optional new orientation to apply to the cloned Rover.
 	 * @return A new Rover instance with the specified position and orientation, or
 	 *         the original ones if not overridden.
+	 * @param roverState
 	 */
-	public clone({
-		position,
-		orientation,
-	}: {
-		position?: Position
-		orientation?: Orientation
-	} = {}): Rover {
-		return new Rover({
-			position: this.position.clone(position),
-			orientation: orientation ?? this.orientation,
-		})
+	public clone(
+		roverState: {
+			position?: Position
+			orientation?: Orientation
+		} = {},
+	): RoverState {
+		return !roverState
+			? new RoverState(roverState)
+			: new RoverState({
+					position: this.position.clone(roverState.position),
+					orientation: roverState.orientation
+						? roverState.orientation
+						: this.orientation,
+				})
 	}
 }

@@ -12,13 +12,13 @@ import {
 	pipe,
 } from 'effect'
 
+import type { RoverState } from 'domain/rover-state.ts'
 import { Command } from './command.ts'
 import type { GridSize } from './grid-size.ts'
 import { Int } from './int.ts'
 import { Orientation } from './orientation.ts'
 import type { Planet } from './planet.ts'
 import { Position } from './position.ts'
-import type { Rover } from './rover.ts'
 
 /**
  * Wraps a position coordinate around grid boundaries (pacman effect).
@@ -58,32 +58,32 @@ export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
 }> {}
 
 export function processBatch(
-	currentRover: Ref.Ref<Rover>,
+	currentRoverStateRef: Ref.Ref<RoverState>,
 	planet: Planet,
 	commands: Array.NonEmptyReadonlyArray<Command>,
 ): Effect.Effect<void, CollisionDetected> {
 	return Effect.gen(function* () {
 		for (const command of commands) {
 			const nextOrObstacle = yield* Effect.either(
-				move(yield* Ref.get(currentRover), planet, command),
+				move(yield* Ref.get(currentRoverStateRef), planet, command),
 			)
 
 			if (Either.isLeft(nextOrObstacle)) {
 				return yield* Effect.fail(nextOrObstacle.left)
 			}
 			if (Either.isRight(nextOrObstacle)) {
-				yield* Ref.set(currentRover, nextOrObstacle.right)
+				yield* Ref.set(currentRoverStateRef, nextOrObstacle.right)
 			}
 		}
 	})
 }
 
 export function move(
-	rover: Rover,
+	rover: RoverState,
 	planet: Planet,
 	command: Command,
-): Effect.Effect<Rover, CollisionDetected> {
-	const nextRover: Rover = nextMove(rover, planet, command)
+): Effect.Effect<RoverState, CollisionDetected> {
+	const nextRover: RoverState = nextMove(rover, planet, command)
 	if (HashSet.has(planet.obstacles, nextRover.position)) {
 		return Effect.fail(
 			new CollisionDetected({
@@ -99,7 +99,11 @@ export function move(
 /**
  *  Implement wrapping from one edge of the grid to another (pacman effect).
  */
-function nextMove(rover: Rover, planet: Planet, command: Command): Rover {
+function nextMove(
+	rover: RoverState,
+	planet: Planet,
+	command: Command,
+): RoverState {
 	return pipe(
 		command,
 		Command.$match({

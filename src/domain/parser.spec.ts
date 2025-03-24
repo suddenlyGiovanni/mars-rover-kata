@@ -21,7 +21,7 @@ import {
 } from './parser.ts'
 import { Planet } from './planet.ts'
 import { Position } from './position.ts'
-import { Rover } from './rover.ts'
+import { RoverState } from './rover-state.ts'
 
 describe('wrapGridPosition', () => {
 	// Define common grid sizes for tests
@@ -125,7 +125,7 @@ describe('move', () => {
 			async ({ initialOrientation, expectedNextOrientation }) => {
 				const { orientation } = await Effect.runPromise(
 					move(
-						new Rover({
+						new RoverState({
 							position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 							orientation: initialOrientation,
 						}),
@@ -161,7 +161,7 @@ describe('move', () => {
 			async ({ initialOrientation, expectedNextOrientation }) => {
 				const { orientation } = await Effect.runPromise(
 					move(
-						new Rover({
+						new RoverState({
 							position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 							orientation: initialOrientation,
 						}),
@@ -181,44 +181,44 @@ describe('move', () => {
 			const orientation = Orientation.North()
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 						orientation,
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 						orientation,
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
@@ -243,7 +243,7 @@ describe('move', () => {
 								y: Position.Y(0),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -280,44 +280,44 @@ describe('move', () => {
 
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 					}),
@@ -342,7 +342,7 @@ describe('move', () => {
 								y: Position.Y(0),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -379,55 +379,55 @@ describe('move', () => {
 
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
@@ -453,7 +453,7 @@ describe('move', () => {
 								y: Position.Y(0),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -490,55 +490,55 @@ describe('move', () => {
 
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
@@ -563,7 +563,7 @@ describe('move', () => {
 								y: Position.Y(0),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -603,44 +603,44 @@ describe('move', () => {
 			const orientation = Orientation.North()
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 						orientation,
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 						orientation,
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
@@ -665,7 +665,7 @@ describe('move', () => {
 								y: Position.Y(0),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -702,44 +702,44 @@ describe('move', () => {
 
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(1) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(2) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(3) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
@@ -763,7 +763,7 @@ describe('move', () => {
 								y: Position.Y(3),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -800,55 +800,55 @@ describe('move', () => {
 
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
@@ -873,7 +873,7 @@ describe('move', () => {
 								y: Position.Y(0),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -910,55 +910,55 @@ describe('move', () => {
 
 			it.for([
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(1), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(2), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(3), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
 				},
 
 				{
-					initialRover: new Rover({
+					initialRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(4), y: Position.Y(0) }),
 					}),
-					expectedRover: new Rover({
+					expectedRover: new RoverState({
 						orientation,
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 					}),
@@ -983,7 +983,7 @@ describe('move', () => {
 								y: Position.Y(0),
 							})
 
-							const initialRover = new Rover({
+							const initialRover = new RoverState({
 								position: initialRoverPosition,
 								orientation,
 							})
@@ -1032,8 +1032,8 @@ describe('processBatch', () => {
 				/**
 				 * Arrange: Initial rover at (0,0) facing North
 				 */
-				const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(
-					new Rover({
+				const currentRoverRef: Ref.Ref<RoverState> = yield* Ref.make(
+					new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 						orientation: Orientation.North(),
 					}),
@@ -1070,12 +1070,13 @@ describe('processBatch', () => {
 					/**
 					 * Arrange: Initial rover at (0,0) facing North
 					 */
-					const initialRover = new Rover({
+					const initialRover = new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 						orientation: Orientation.North(),
 					})
 
-					const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(initialRover)
+					const currentRoverRef: Ref.Ref<RoverState> =
+						yield* Ref.make(initialRover)
 
 					/**
 					 * Act: Commands that cancel each other out (turn left then turn right)
@@ -1103,12 +1104,13 @@ describe('processBatch', () => {
 					/**
 					 * Arrange: Initial rover at (0,0) facing North
 					 */
-					const initialRover = new Rover({
+					const initialRover = new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 						orientation: Orientation.North(),
 					})
 
-					const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(initialRover)
+					const currentRoverRef: Ref.Ref<RoverState> =
+						yield* Ref.make(initialRover)
 
 					/**
 					 * Act: batch Commands
@@ -1152,7 +1154,7 @@ describe('processBatch', () => {
 					/**
 					 * Arrange: Initial rover at (0,0) facing North
 					 */
-					const initialRover = new Rover({
+					const initialRover = new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 						orientation: Orientation.North(),
 					})
@@ -1165,7 +1167,8 @@ describe('processBatch', () => {
 						y: Position.Y(2),
 					})
 
-					const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(initialRover)
+					const currentRoverRef: Ref.Ref<RoverState> =
+						yield* Ref.make(initialRover)
 
 					/**
 					 * Act: Commands Move forward twice (second move will cause collision), then turn right
