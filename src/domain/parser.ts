@@ -3,7 +3,6 @@ import {
 	type Array,
 	Data,
 	Effect,
-	Either,
 	HashSet,
 	Ref,
 	pipe,
@@ -59,38 +58,34 @@ export function processBatch(
 	planet: Planet,
 	commands: Array.NonEmptyReadonlyArray<Command>,
 ): Effect.Effect<void, CollisionDetected> {
-	return Effect.gen(function* () {
-		for (const command of commands) {
-			const nextOrObstacle = yield* Effect.either(
-				move(yield* Ref.get(currentRoverStateRef), planet, command),
-			)
-
-			if (Either.isLeft(nextOrObstacle)) {
-				return yield* Effect.fail(nextOrObstacle.left)
-			}
-			if (Either.isRight(nextOrObstacle)) {
-				yield* Ref.set(currentRoverStateRef, nextOrObstacle.right)
-			}
-		}
-	})
+	return Effect.forEach(
+		commands,
+		(command) => move(currentRoverStateRef, planet, command),
+		{ discard: true },
+	)
 }
 
 export function move(
-	roverState: RoverState,
+	currentRoverStateRef: Ref.Ref<RoverState>,
 	planet: Planet,
 	command: Command,
-): Effect.Effect<RoverState, CollisionDetected> {
-	const nextRover: RoverState = nextMove(roverState, planet, command)
-	if (HashSet.has(planet.obstacles, nextRover.position)) {
-		return Effect.fail(
-			new CollisionDetected({
-				obstaclePosition: nextRover.position,
-				roverState: roverState,
-			}),
-		)
-	}
+): Effect.Effect<void, CollisionDetected> {
+	return Effect.gen(function* () {
+		const roverState = yield* Ref.get(currentRoverStateRef)
 
-	return Effect.succeed(nextRover)
+		const nextRover: RoverState = nextMove(roverState, planet, command)
+
+		if (HashSet.has(planet.obstacles, nextRover.position)) {
+			return yield* Effect.fail(
+				new CollisionDetected({
+					obstaclePosition: nextRover.position,
+					roverState,
+				}),
+			)
+		}
+
+		yield* Ref.set(currentRoverStateRef, nextRover)
+	})
 }
 
 /**
