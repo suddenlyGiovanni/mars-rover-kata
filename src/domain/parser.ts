@@ -1,3 +1,4 @@
+import { commands } from 'npm:fast-check@3.23.2'
 import {
 	// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 	type Array,
@@ -57,38 +58,23 @@ export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
 }> {}
 
 export function processBatch(
-	rover: Rover,
+	currentRover: Ref.Ref<Rover>,
 	planet: Planet,
 	commands: Array.NonEmptyReadonlyArray<Command>,
-): Effect.Effect<
-	readonly [
-		lastRoverState: Rover,
-		maybeCollisionDetected: Option.Option<CollisionDetected>,
-	]
-> {
+): Effect.Effect<void, CollisionDetected> {
 	return Effect.gen(function* () {
-		const roverRef = yield* Ref.make(rover)
-
 		for (const command of commands) {
-			const nextState = yield* Effect.either(
-				move(yield* Ref.get(roverRef), planet, command),
+			const nextOrObstacle = yield* Effect.either(
+				move(yield* Ref.get(currentRover), planet, command),
 			)
 
-			if (Either.isLeft(nextState)) {
-				return yield* Effect.succeed([
-					yield* Ref.get(roverRef),
-					Option.some(nextState.left),
-				] as const)
+			if (Either.isLeft(nextOrObstacle)) {
+				return yield* Effect.fail(nextOrObstacle.left)
 			}
-			if (Either.isRight(nextState)) {
-				yield* Ref.set(roverRef, nextState.right)
+			if (Either.isRight(nextOrObstacle)) {
+				yield* Ref.set(currentRover, nextOrObstacle.right)
 			}
 		}
-
-		return yield* Effect.succeed([
-			yield* Ref.get(roverRef),
-			Option.none<CollisionDetected>(),
-		] as const)
 	})
 }
 

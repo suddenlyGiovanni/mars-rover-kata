@@ -3,9 +3,11 @@ import {
 	// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 	Array,
 	Effect,
+	Equal,
 	Exit,
 	HashSet,
 	Option,
+	Ref,
 } from 'effect'
 
 import { Command } from './command.ts'
@@ -1025,6 +1027,42 @@ describe('processBatch', () => {
 	})
 
 	describe('GIVEN a rover and a sequence of commands', () => {
+		it.effect('SHOULD handle a single command correctly', ({ expect }) =>
+			Effect.gen(function* () {
+				/**
+				 * Arrange: Initial rover at (0,0) facing North
+				 */
+				const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(
+					new Rover({
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+						orientation: Orientation.North(),
+					}),
+				)
+
+				/**
+				 * Act: Single command Turn left
+				 */
+				const result = yield* Effect.exit(
+					processBatch(currentRoverRef, planet, Array.make(Command.TurnLeft())),
+				)
+
+				/**
+				 * Assert: Expected (0,0) facing West
+				 */
+				expect(result).toStrictEqual(Exit.void)
+
+				const finalRover = yield* Ref.get(currentRoverRef)
+
+				expect(finalRover.position).toEqual(
+					new Position({
+						x: Position.X(0),
+						y: Position.Y(0),
+					}),
+				)
+				expect(finalRover.orientation).toEqual(Orientation.West())
+			}),
+		)
+
 		it.effect(
 			'SHOULD handle commands that cancel each other out by returning the initial rover state unchanged',
 			({ expect }) =>
@@ -1037,30 +1075,24 @@ describe('processBatch', () => {
 						orientation: Orientation.North(),
 					})
 
+					const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(initialRover)
+
 					/**
 					 * Act: Commands that cancel each other out (turn left then turn right)
 					 */
-					const commands = Array.make(Command.TurnLeft(), Command.TurnRight())
-
-					const result = yield* processBatch(initialRover, planet, commands)
-
-					/**
-					 * Assert: Expected unchanged rover state
-					 */
-
-					/**
-					 * Check the result structure
-					 */
-					expect(result).toHaveLength(2)
-					const [finalRover, collisionDetected] = result
+					const result: Exit.Exit<void, CollisionDetected> = yield* Effect.exit(
+						processBatch(
+							currentRoverRef,
+							planet,
+							Array.make(Command.TurnLeft(), Command.TurnRight()),
+						),
+					)
 
 					/**
-					 * Check the final rover state (should be unchanged)
+					 * Assert: Check the final rover state (should be unchanged)
 					 */
-					expect(finalRover).toEqual(initialRover)
-
-					// Check that no collision was detected
-					expect(Option.isNone(collisionDetected)).toBe(true)
+					expect(result).toStrictEqual(Exit.void)
+					expect(yield* Ref.get(currentRoverRef)).toStrictEqual(initialRover)
 				}),
 		)
 
@@ -1076,40 +1108,40 @@ describe('processBatch', () => {
 						orientation: Orientation.North(),
 					})
 
+					const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(initialRover)
+
 					/**
 					 * Act: batch Commands
 					 */
-					const commands = Array.make(
-						Command.GoForward(),
-						Command.TurnRight(),
-						Command.GoForward(),
+					const result: Exit.Exit<void, CollisionDetected> = yield* Effect.exit(
+						processBatch(
+							currentRoverRef,
+							planet,
+							Array.make(
+								Command.GoForward(),
+								Command.TurnRight(),
+								Command.GoForward(),
+							),
+						),
 					)
-
-					const result = yield* processBatch(initialRover, planet, commands)
 
 					/**
 					 * Assert Expected final position: (1,1) facing East
 					 */
+					expect(result).toStrictEqual(Exit.void)
 
-					/**
-					 * Check the result structure
-					 */
-					expect(result).toHaveLength(2)
-					const [finalRover, collisionDetected] = result
+					const finalRover = yield* Ref.get(currentRoverRef)
 
-					/**
-					 * Check the final rover state
-					 */
-					expect(finalRover.position).toEqual(
+					expect(finalRover.position).toStrictEqual(
 						new Position({
 							x: Position.X(1),
 							y: Position.Y(1),
 						}),
 					)
-					expect(finalRover.orientation).toEqual(Orientation.Est())
 
-					// Check that no collision was detected
-					expect(Option.isNone(collisionDetected)).toBe(true)
+					expect(Equal.equals(finalRover.orientation, Orientation.Est())).toBe(
+						true,
+					)
 				}),
 		)
 
@@ -1126,101 +1158,57 @@ describe('processBatch', () => {
 					})
 
 					/**
-					 * Place an obstacle at (0,2)
+					 * Arrange: Place an obstacle at (0,2)
 					 */
 					const obstaclePosition = new Position({
 						x: Position.X(0),
 						y: Position.Y(2),
 					})
-					const planetWithObstacle = planet.clone({
-						obstacles: HashSet.add(planet.obstacles, obstaclePosition),
-					})
+
+					const currentRoverRef: Ref.Ref<Rover> = yield* Ref.make(initialRover)
 
 					/**
 					 * Act: Commands Move forward twice (second move will cause collision), then turn right
 					 */
-					const commands = Array.make(
-						Command.GoForward(),
-						Command.GoForward(),
-						Command.TurnRight(),
+					const result: Exit.Exit<void, CollisionDetected> = yield* Effect.exit(
+						processBatch(
+							currentRoverRef,
+							planet.clone({
+								obstacles: HashSet.add(planet.obstacles, obstaclePosition),
+							}),
+							/**
+							 * Commands Move forward twice (second move will cause collision), then turn right
+							 */
+							Array.make(
+								Command.GoForward(),
+								Command.GoForward(),
+								Command.TurnRight(),
+							),
+						),
 					)
 
 					/**
-					 * Assert: Expected final position (0,1) facing North (before collision)
+					 * Assert:
+					 * - Check that a collision was detected
+					 * - Expected final position (0,1) facing North (before collision)
 					 */
-					const expectedFinalPosition = new Position({
-						x: Position.X(0),
-						y: Position.Y(1),
-					})
-					const expectedOrientation = Orientation.North()
-
-					const result = yield* processBatch(
-						initialRover,
-						planetWithObstacle,
-						commands,
+					expect(result).toStrictEqual(
+						Exit.fail(
+							new CollisionDetected({
+								obstaclePosition: obstaclePosition,
+								roverPosition: new Position({
+									x: Position.X(0),
+									y: Position.Y(1),
+								}),
+							}),
+						),
 					)
 
-					/**
-					 * Check the result structure
-					 */
-					expect(result).toHaveLength(2)
-
-					/**
-					 * Check the final rover state (should be the last valid state before collision)
-					 */
-					const [finalRover, collisionDetected] = result
-					expect(finalRover.position).toEqual(expectedFinalPosition)
-					expect(finalRover.orientation).toEqual(expectedOrientation)
-
-					/**
-					 * Check that a collision was detected
-					 */
-					expect(Option.isSome(collisionDetected)).toBe(true)
-
-					/**
-					 * Verify collision details
-					 */
-					if (Option.isSome(collisionDetected)) {
-						const collision = collisionDetected.value
-						expect(collision.obstaclePosition).toEqual(obstaclePosition)
-						expect(collision.roverPosition).toEqual(expectedFinalPosition)
-					}
+					const finalRover = yield* Ref.get(currentRoverRef)
+					expect(
+						Equal.equals(finalRover.orientation, Orientation.North()),
+					).toBe(true)
 				}),
-		)
-
-		it.effect('SHOULD handle a single command correctly', ({ expect }) =>
-			Effect.gen(function* () {
-				/**
-				 * Arrange: Initial rover at (0,0) facing North
-				 */
-				const initialRover = new Rover({
-					position: new Position({ x: Position.X(0), y: Position.Y(0) }),
-					orientation: Orientation.North(),
-				})
-
-				/**
-				 * Act: Single command Turn left
-				 */
-				const commands = Array.make(Command.TurnLeft())
-				const result = yield* processBatch(initialRover, planet, commands)
-
-				/**
-				 * Assert: Expected (0,0) facing West
-				 */
-				const [finalRover, collisionDetected] = result
-				expect(finalRover.position).toEqual(
-					new Position({
-						x: Position.X(0),
-						y: Position.Y(0),
-					}),
-				)
-				expect(finalRover.orientation).toEqual(Orientation.West())
-
-				/**
-				 * Check that no collision was detected
-				 */
-				expect(Option.isNone(collisionDetected)).toBe(true)
-			}),
 		)
 	})
 })
