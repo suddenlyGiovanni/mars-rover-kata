@@ -238,13 +238,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(0),
-								y: Position.Y(0),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(0),
+									y: Position.Y(0),
+								}),
 								orientation,
 							})
 
@@ -266,7 +264,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -337,13 +335,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(0),
-								y: Position.Y(0),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(0),
+									y: Position.Y(0),
+								}),
 								orientation,
 							})
 
@@ -365,7 +361,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -448,13 +444,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(4),
-								y: Position.Y(0),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(4),
+									y: Position.Y(0),
+								}),
 								orientation,
 							})
 
@@ -476,7 +470,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -558,13 +552,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(0),
-								y: Position.Y(0),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(0),
+									y: Position.Y(0),
+								}),
 								orientation,
 							})
 
@@ -586,7 +578,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -660,13 +652,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(0),
-								y: Position.Y(0),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(0),
+									y: Position.Y(0),
+								}),
 								orientation,
 							})
 
@@ -688,7 +678,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -758,13 +748,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(0),
-								y: Position.Y(3),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(0),
+									y: Position.Y(3),
+								}),
 								orientation,
 							})
 
@@ -786,7 +774,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -868,13 +856,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(0),
-								y: Position.Y(0),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(0),
+									y: Position.Y(0),
+								}),
 								orientation,
 							})
 
@@ -896,7 +882,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -978,13 +964,11 @@ describe('move', () => {
 					`SHOULD return an "${CollisionDetected.name}" error`,
 					({ expect }) =>
 						Effect.gen(function* () {
-							const initialRoverPosition = new Position({
-								x: Position.X(4),
-								y: Position.Y(0),
-							})
-
 							const initialRover = new RoverState({
-								position: initialRoverPosition,
+								position: new Position({
+									x: Position.X(4),
+									y: Position.Y(0),
+								}),
 								orientation,
 							})
 
@@ -1006,7 +990,7 @@ describe('move', () => {
 								Exit.fail(
 									new CollisionDetected({
 										obstaclePosition: obstaclePosition,
-										roverPosition: initialRoverPosition,
+										roverState: initialRover,
 									}),
 								),
 							)
@@ -1199,18 +1183,16 @@ describe('processBatch', () => {
 						Exit.fail(
 							new CollisionDetected({
 								obstaclePosition: obstaclePosition,
-								roverPosition: new Position({
-									x: Position.X(0),
-									y: Position.Y(1),
+								roverState: new RoverState({
+									position: new Position({
+										x: Position.X(0),
+										y: Position.Y(1),
+									}),
+									orientation: Orientation.North(),
 								}),
 							}),
 						),
 					)
-
-					const finalRover = yield* Ref.get(currentRoverRef)
-					expect(
-						Equal.equals(finalRover.orientation, Orientation.North()),
-					).toBe(true)
 				}),
 		)
 	})

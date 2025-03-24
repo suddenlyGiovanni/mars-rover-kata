@@ -1,4 +1,3 @@
-import { commands } from 'npm:fast-check@3.23.2'
 import {
 	// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 	type Array,
@@ -12,13 +11,13 @@ import {
 	pipe,
 } from 'effect'
 
-import type { RoverState } from 'domain/rover-state.ts'
 import { Command } from './command.ts'
 import type { GridSize } from './grid-size.ts'
 import { Int } from './int.ts'
 import { Orientation } from './orientation.ts'
 import type { Planet } from './planet.ts'
 import { Position } from './position.ts'
+import type { RoverState } from './rover-state.ts'
 
 /**
  * Wraps a position coordinate around grid boundaries (pacman effect).
@@ -54,7 +53,7 @@ export function wrapGridPosition<P extends Position.X | Position.Y>(
 
 export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
 	readonly obstaclePosition: Position
-	readonly roverPosition: Position
+	readonly roverState: RoverState
 }> {}
 
 export function processBatch(
@@ -88,7 +87,7 @@ export function move(
 		return Effect.fail(
 			new CollisionDetected({
 				obstaclePosition: nextRover.position,
-				roverPosition: rover.position,
+				roverState: rover,
 			}),
 		)
 	}
