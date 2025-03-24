@@ -1,5 +1,12 @@
 import { describe, expect, it } from '@effect/vitest'
-import { Array, Effect, Exit, HashSet, Option } from 'effect'
+import {
+	// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
+	Array,
+	Effect,
+	Exit,
+	HashSet,
+	Option,
+} from 'effect'
 
 import { Command } from './command.ts'
 import { GridSize } from './grid-size.ts'
@@ -1018,6 +1025,45 @@ describe('processBatch', () => {
 	})
 
 	describe('GIVEN a rover and a sequence of commands', () => {
+		it.effect(
+			'SHOULD handle commands that cancel each other out by returning the initial rover state unchanged',
+			({ expect }) =>
+				Effect.gen(function* () {
+					/**
+					 * Arrange: Initial rover at (0,0) facing North
+					 */
+					const initialRover = new Rover({
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+						orientation: Orientation.North(),
+					})
+
+					/**
+					 * Act: Commands that cancel each other out (turn left then turn right)
+					 */
+					const commands = Array.make(Command.TurnLeft(), Command.TurnRight())
+
+					const result = yield* processBatch(initialRover, planet, commands)
+
+					/**
+					 * Assert: Expected unchanged rover state
+					 */
+
+					/**
+					 * Check the result structure
+					 */
+					expect(result).toHaveLength(2)
+					const [finalRover, collisionDetected] = result
+
+					/**
+					 * Check the final rover state (should be unchanged)
+					 */
+					expect(finalRover).toEqual(initialRover)
+
+					// Check that no collision was detected
+					expect(Option.isNone(collisionDetected)).toBe(true)
+				}),
+		)
+
 		it.effect(
 			'SHOULD process all commands and return the final rover state with no collision',
 			({ expect }) =>
