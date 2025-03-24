@@ -5,9 +5,7 @@ import {
 	Effect,
 	Either,
 	HashSet,
-	Option,
 	Ref,
-	hole,
 	pipe,
 } from 'effect'
 
@@ -78,16 +76,16 @@ export function processBatch(
 }
 
 export function move(
-	rover: RoverState,
+	roverState: RoverState,
 	planet: Planet,
 	command: Command,
 ): Effect.Effect<RoverState, CollisionDetected> {
-	const nextRover: RoverState = nextMove(rover, planet, command)
+	const nextRover: RoverState = nextMove(roverState, planet, command)
 	if (HashSet.has(planet.obstacles, nextRover.position)) {
 		return Effect.fail(
 			new CollisionDetected({
 				obstaclePosition: nextRover.position,
-				roverState: rover,
+				roverState: roverState,
 			}),
 		)
 	}
@@ -99,7 +97,7 @@ export function move(
  *  Implement wrapping from one edge of the grid to another (pacman effect).
  */
 function nextMove(
-	rover: RoverState,
+	roverState: RoverState,
 	planet: Planet,
 	command: Command,
 ): RoverState {
@@ -108,71 +106,71 @@ function nextMove(
 		Command.$match({
 			TurnLeft: () =>
 				pipe(
-					rover.orientation,
+					roverState.orientation,
 					Orientation.$match({
-						North: () => rover.clone({ orientation: Orientation.West() }),
+						North: () => roverState.clone({ orientation: Orientation.West() }),
 
-						South: () => rover.clone({ orientation: Orientation.Est() }),
+						South: () => roverState.clone({ orientation: Orientation.Est() }),
 
-						West: () => rover.clone({ orientation: Orientation.South() }),
+						West: () => roverState.clone({ orientation: Orientation.South() }),
 
-						Est: () => rover.clone({ orientation: Orientation.North() }),
+						Est: () => roverState.clone({ orientation: Orientation.North() }),
 					}),
 				),
 
 			TurnRight: () =>
 				pipe(
-					rover.orientation,
+					roverState.orientation,
 					Orientation.$match({
-						North: () => rover.clone({ orientation: Orientation.Est() }),
+						North: () => roverState.clone({ orientation: Orientation.Est() }),
 
-						Est: () => rover.clone({ orientation: Orientation.South() }),
+						Est: () => roverState.clone({ orientation: Orientation.South() }),
 
-						South: () => rover.clone({ orientation: Orientation.West() }),
+						South: () => roverState.clone({ orientation: Orientation.West() }),
 
-						West: () => rover.clone({ orientation: Orientation.North() }),
+						West: () => roverState.clone({ orientation: Orientation.North() }),
 					}),
 				),
 
 			GoForward: () =>
 				pipe(
-					rover.orientation,
+					roverState.orientation,
 					Orientation.$match({
 						North: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									y: wrapGridPosition(
-										Position.Y(Int.add(rover.position.y, Int.unit)),
+										Position.Y(Int.add(roverState.position.y, Int.unit)),
 										planet.size.height,
 									),
 								}),
 							}),
 
 						South: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									y: wrapGridPosition(
-										Position.Y(Int.sub(rover.position.y, Int.unit)),
+										Position.Y(Int.sub(roverState.position.y, Int.unit)),
 										planet.size.height,
 									),
 								}),
 							}),
 
 						West: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									x: wrapGridPosition(
-										Position.X(Int.sub(rover.position.x, Int.unit)),
+										Position.X(Int.sub(roverState.position.x, Int.unit)),
 										planet.size.width,
 									),
 								}),
 							}),
 
 						Est: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									x: wrapGridPosition(
-										Position.X(Int.add(rover.position.x, Int.unit)),
+										Position.X(Int.add(roverState.position.x, Int.unit)),
 										planet.size.width,
 									),
 								}),
@@ -182,43 +180,43 @@ function nextMove(
 
 			GoBackward: () =>
 				pipe(
-					rover.orientation,
+					roverState.orientation,
 					Orientation.$match({
 						North: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									y: wrapGridPosition(
-										Position.Y(Int.sub(rover.position.y, Int.unit)),
+										Position.Y(Int.sub(roverState.position.y, Int.unit)),
 										planet.size.height,
 									),
 								}),
 							}),
 
 						South: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									y: wrapGridPosition(
-										Position.Y(Int.add(rover.position.y, Int.unit)),
+										Position.Y(Int.add(roverState.position.y, Int.unit)),
 										planet.size.height,
 									),
 								}),
 							}),
 
 						Est: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									x: wrapGridPosition(
-										Position.X(Int.sub(rover.position.x, Int.unit)),
+										Position.X(Int.sub(roverState.position.x, Int.unit)),
 										planet.size.width,
 									),
 								}),
 							}),
 
 						West: () =>
-							rover.clone({
-								position: rover.position.clone({
+							roverState.clone({
+								position: roverState.position.clone({
 									x: wrapGridPosition(
-										Position.X(Int.add(rover.position.x, Int.unit)),
+										Position.X(Int.add(roverState.position.x, Int.unit)),
 										planet.size.width,
 									),
 								}),
