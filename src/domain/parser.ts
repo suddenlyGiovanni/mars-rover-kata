@@ -1,4 +1,5 @@
 import {
+	// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 	type Array,
 	Data,
 	Effect,

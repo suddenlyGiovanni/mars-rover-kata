@@ -1,10 +1,15 @@
 import { describe, expect, it } from '@effect/vitest'
-import { Effect, Exit, HashSet } from 'effect'
+import { Array, Effect, Exit, HashSet, Option } from 'effect'
 
 import { Command } from './command.ts'
 import { GridSize } from './grid-size.ts'
 import { Orientation } from './orientation.ts'
-import { CollisionDetected, move, wrapGridPosition } from './parser.ts'
+import {
+	CollisionDetected,
+	move,
+	processBatch,
+	wrapGridPosition,
+} from './parser.ts'
 import { Planet } from './planet.ts'
 import { Position } from './position.ts'
 import { Rover } from './rover.ts'
@@ -1000,5 +1005,176 @@ describe('move', () => {
 				)
 			})
 		})
+	})
+})
+
+describe('processBatch', () => {
+	const planet = new Planet({
+		size: new GridSize({
+			width: GridSize.Width(5),
+			height: GridSize.Height(4),
+		}),
+		obstacles: HashSet.make<Position[]>(),
+	})
+
+	describe('GIVEN a rover and a sequence of commands', () => {
+		it.effect(
+			'SHOULD process all commands and return the final rover state with no collision',
+			({ expect }) =>
+				Effect.gen(function* () {
+					/**
+					 * Arrange: Initial rover at (0,0) facing North
+					 */
+					const initialRover = new Rover({
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+						orientation: Orientation.North(),
+					})
+
+					/**
+					 * Act: batch Commands
+					 */
+					const commands = Array.make(
+						Command.GoForward(),
+						Command.TurnRight(),
+						Command.GoForward(),
+					)
+
+					const result = yield* processBatch(initialRover, planet, commands)
+
+					/**
+					 * Assert Expected final position: (1,1) facing East
+					 */
+
+					/**
+					 * Check the result structure
+					 */
+					expect(result).toHaveLength(2)
+					const [finalRover, collisionDetected] = result
+
+					/**
+					 * Check the final rover state
+					 */
+					expect(finalRover.position).toEqual(
+						new Position({
+							x: Position.X(1),
+							y: Position.Y(1),
+						}),
+					)
+					expect(finalRover.orientation).toEqual(Orientation.Est())
+
+					// Check that no collision was detected
+					expect(Option.isNone(collisionDetected)).toBe(true)
+				}),
+		)
+
+		it.effect(
+			'SHOULD stop processing when a collision is detected and return the last valid state',
+			({ expect }) =>
+				Effect.gen(function* () {
+					/**
+					 * Arrange: Initial rover at (0,0) facing North
+					 */
+					const initialRover = new Rover({
+						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+						orientation: Orientation.North(),
+					})
+
+					/**
+					 * Place an obstacle at (0,2)
+					 */
+					const obstaclePosition = new Position({
+						x: Position.X(0),
+						y: Position.Y(2),
+					})
+					const planetWithObstacle = planet.clone({
+						obstacles: HashSet.add(planet.obstacles, obstaclePosition),
+					})
+
+					/**
+					 * Act: Commands Move forward twice (second move will cause collision), then turn right
+					 */
+					const commands = Array.make(
+						Command.GoForward(),
+						Command.GoForward(),
+						Command.TurnRight(),
+					)
+
+					/**
+					 * Assert: Expected final position (0,1) facing North (before collision)
+					 */
+					const expectedFinalPosition = new Position({
+						x: Position.X(0),
+						y: Position.Y(1),
+					})
+					const expectedOrientation = Orientation.North()
+
+					const result = yield* processBatch(
+						initialRover,
+						planetWithObstacle,
+						commands,
+					)
+
+					/**
+					 * Check the result structure
+					 */
+					expect(result).toHaveLength(2)
+
+					/**
+					 * Check the final rover state (should be the last valid state before collision)
+					 */
+					const [finalRover, collisionDetected] = result
+					expect(finalRover.position).toEqual(expectedFinalPosition)
+					expect(finalRover.orientation).toEqual(expectedOrientation)
+
+					/**
+					 * Check that a collision was detected
+					 */
+					expect(Option.isSome(collisionDetected)).toBe(true)
+
+					/**
+					 * Verify collision details
+					 */
+					if (Option.isSome(collisionDetected)) {
+						const collision = collisionDetected.value
+						expect(collision.obstaclePosition).toEqual(obstaclePosition)
+						expect(collision.roverPosition).toEqual(expectedFinalPosition)
+					}
+				}),
+		)
+
+		it.effect('SHOULD handle a single command correctly', ({ expect }) =>
+			Effect.gen(function* () {
+				/**
+				 * Arrange: Initial rover at (0,0) facing North
+				 */
+				const initialRover = new Rover({
+					position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+					orientation: Orientation.North(),
+				})
+
+				/**
+				 * Act: Single command Turn left
+				 */
+				const commands = Array.make(Command.TurnLeft())
+				const result = yield* processBatch(initialRover, planet, commands)
+
+				/**
+				 * Assert: Expected (0,0) facing West
+				 */
+				const [finalRover, collisionDetected] = result
+				expect(finalRover.position).toEqual(
+					new Position({
+						x: Position.X(0),
+						y: Position.Y(0),
+					}),
+				)
+				expect(finalRover.orientation).toEqual(Orientation.West())
+
+				/**
+				 * Check that no collision was detected
+				 */
+				expect(Option.isNone(collisionDetected)).toBe(true)
+			}),
+		)
 	})
 })
