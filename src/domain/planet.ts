@@ -1,4 +1,4 @@
-import { Data, type HashSet } from 'effect'
+import { Context, Data, type HashSet } from 'effect'
 
 import type { GridSize } from './grid-size.ts'
 import type { Position } from './position.ts'
@@ -49,3 +49,8 @@ export class Planet extends Data.TaggedClass('Planet')<{
 				})
 	}
 }
+
+export class PlanetService extends Context.Tag('app/PlanetService')<
+	PlanetService,
+	Planet
+>() {}

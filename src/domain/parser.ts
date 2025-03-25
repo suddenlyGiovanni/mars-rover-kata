@@ -12,7 +12,7 @@ import { Command } from './command.ts'
 import type { GridSize } from './grid-size.ts'
 import { Int } from './int.ts'
 import { Orientation } from './orientation.ts'
-import type { Planet } from './planet.ts'
+import { type Planet, PlanetService } from './planet.ts'
 import { Position } from './position.ts'
 import type { RoverState } from './rover-state.ts'
 
@@ -55,13 +55,16 @@ export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
 
 export function processBatch(
 	currentRoverStateRef: Ref.Ref<RoverState>,
-	planet: Planet,
 	commands: Array.NonEmptyReadonlyArray<Command>,
-): Effect.Effect<void, CollisionDetected> {
-	return Effect.forEach(
-		commands,
-		(command) => move(currentRoverStateRef, planet, command),
-		{ discard: true },
+): Effect.Effect<void, CollisionDetected, PlanetService> {
+	return PlanetService.pipe(
+		Effect.andThen((planet) =>
+			Effect.forEach(
+				commands,
+				(command) => move(currentRoverStateRef, planet, command),
+				{ discard: true },
+			),
+		),
 	)
 }
 

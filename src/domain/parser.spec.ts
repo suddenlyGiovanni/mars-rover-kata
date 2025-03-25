@@ -18,7 +18,7 @@ import {
 	processBatch,
 	wrapGridPosition,
 } from './parser.ts'
-import { Planet } from './planet.ts'
+import { Planet, PlanetService } from './planet.ts'
 import { Position } from './position.ts'
 import { RoverState } from './rover-state.ts'
 
@@ -1076,7 +1076,7 @@ describe('processBatch', () => {
 				 * Act: Single command Turn left
 				 */
 				const result = yield* Effect.exit(
-					processBatch(currentRoverRef, planet, Array.make(Command.TurnLeft())),
+					processBatch(currentRoverRef, Array.make(Command.TurnLeft())),
 				)
 
 				/**
@@ -1093,7 +1093,7 @@ describe('processBatch', () => {
 					}),
 				)
 				expect(finalRover.orientation).toEqual(Orientation.West())
-			}),
+			}).pipe(Effect.provideService(PlanetService, planet)),
 		)
 
 		it.effect(
@@ -1117,7 +1117,6 @@ describe('processBatch', () => {
 					const result: Exit.Exit<void, CollisionDetected> = yield* Effect.exit(
 						processBatch(
 							currentRoverRef,
-							planet,
 							Array.make(Command.TurnLeft(), Command.TurnRight()),
 						),
 					)
@@ -1129,7 +1128,7 @@ describe('processBatch', () => {
 					expect(yield* Ref.get(currentRoverRef)).toStrictEqual(
 						initialRoverState,
 					)
-				}),
+				}).pipe(Effect.provideService(PlanetService, planet)),
 		)
 
 		it.effect(
@@ -1153,7 +1152,6 @@ describe('processBatch', () => {
 					const result: Exit.Exit<void, CollisionDetected> = yield* Effect.exit(
 						processBatch(
 							currentRoverRef,
-							planet,
 							Array.make(
 								Command.GoForward(),
 								Command.TurnRight(),
@@ -1179,7 +1177,7 @@ describe('processBatch', () => {
 					expect(Equal.equals(finalRover.orientation, Orientation.Est())).toBe(
 						true,
 					)
-				}),
+				}).pipe(Effect.provideService(PlanetService, planet)),
 		)
 
 		it.effect(
@@ -1194,14 +1192,6 @@ describe('processBatch', () => {
 						orientation: Orientation.North(),
 					})
 
-					/**
-					 * Arrange: Place an obstacle at (0,2)
-					 */
-					const obstaclePosition = new Position({
-						x: Position.X(0),
-						y: Position.Y(2),
-					})
-
 					const currentRoverRef: Ref.Ref<RoverState> =
 						yield* Ref.make(initialRoverState)
 
@@ -1211,9 +1201,6 @@ describe('processBatch', () => {
 					const result: Exit.Exit<void, CollisionDetected> = yield* Effect.exit(
 						processBatch(
 							currentRoverRef,
-							planet.clone({
-								obstacles: HashSet.add(planet.obstacles, obstaclePosition),
-							}),
 							/**
 							 * Commands Move forward twice (second move will cause collision), then turn right
 							 */
@@ -1233,7 +1220,10 @@ describe('processBatch', () => {
 					expect(result).toStrictEqual(
 						Exit.fail(
 							new CollisionDetected({
-								obstaclePosition: obstaclePosition,
+								obstaclePosition: new Position({
+									x: Position.X(0),
+									y: Position.Y(2),
+								}),
 								roverState: new RoverState({
 									position: new Position({
 										x: Position.X(0),
@@ -1244,7 +1234,23 @@ describe('processBatch', () => {
 							}),
 						),
 					)
-				}),
+				}).pipe(
+					Effect.provideService(
+						PlanetService,
+						planet.clone({
+							obstacles: HashSet.add(
+								planet.obstacles,
+								/**
+								 * Arrange: Place an obstacle at (0,2)
+								 */
+								new Position({
+									x: Position.X(0),
+									y: Position.Y(2),
+								}),
+							),
+						}),
+					),
+				),
 		)
 	})
 })
