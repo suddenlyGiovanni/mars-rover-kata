@@ -57,23 +57,20 @@ export function processBatch(
 	currentRoverStateRef: Ref.Ref<RoverState>,
 	commands: Array.NonEmptyReadonlyArray<Command>,
 ): Effect.Effect<void, CollisionDetected, PlanetService> {
-	return PlanetService.pipe(
-		Effect.andThen((planet) =>
-			Effect.forEach(
-				commands,
-				(command) => move(currentRoverStateRef, planet, command),
-				{ discard: true },
-			),
-		),
+	return Effect.forEach(
+		commands,
+		(command) => move(currentRoverStateRef, command),
+		{ discard: true },
 	)
 }
 
 export function move(
 	currentRoverStateRef: Ref.Ref<RoverState>,
-	planet: Planet,
 	command: Command,
-): Effect.Effect<void, CollisionDetected> {
+): Effect.Effect<void, CollisionDetected, PlanetService> {
 	return Effect.gen(function* () {
+		const planet = yield* PlanetService
+
 		const roverState = yield* Ref.get(currentRoverStateRef)
 
 		const nextRover: RoverState = nextMove(roverState, planet, command)
