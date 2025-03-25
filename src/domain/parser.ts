@@ -56,23 +56,15 @@ export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
 export function processBatch(
 	commands: Array.NonEmptyReadonlyArray<Command>,
 ): Effect.Effect<void, CollisionDetected, PlanetService | RoverStateService> {
-	return RoverStateService.pipe(
-		Effect.flatMap((currentRoverStateRef) => {
-			return Effect.forEach(
-				commands,
-				(command) => move(currentRoverStateRef, command),
-				{ discard: true },
-			)
-		}),
-	)
+	return Effect.forEach(commands, move, { discard: true })
 }
 
 export function move(
-	currentRoverStateRef: Ref.Ref<RoverState>,
 	command: Command,
-): Effect.Effect<void, CollisionDetected, PlanetService> {
+): Effect.Effect<void, CollisionDetected, PlanetService | RoverStateService> {
 	return Effect.gen(function* () {
 		const planet = yield* PlanetService
+		const currentRoverStateRef = yield* RoverStateService
 
 		const roverState = yield* Ref.get(currentRoverStateRef)
 

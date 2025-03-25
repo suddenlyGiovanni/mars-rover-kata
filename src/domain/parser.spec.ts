@@ -95,6 +95,13 @@ describe('wrapGridPosition', () => {
  *                   South
  */
 describe('move', () => {
+	const defaultGridSize = new GridSize({
+		width: GridSize.Width(5),
+		height: GridSize.Height(4),
+	})
+
+	const defaultObstacles = HashSet.make<Position[]>()
+
 	describe(`Should '${Command.TurnLeft()._tag}'`, () => {
 		it.effect.each([
 			{
@@ -117,33 +124,41 @@ describe('move', () => {
 			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
 			({ initialOrientation, expectedNextOrientation }) =>
 				Effect.gen(function* () {
-					const currentRoverStateRef = yield* Ref.make(
-						new RoverState({
-							position: new Position({
-								x: Position.X(0),
-								y: Position.Y(0),
-							}),
-							orientation: initialOrientation,
-						}),
+					const Services: Context.Context<RoverStateService | PlanetService> =
+						Context.empty().pipe(
+							Context.add(
+								PlanetService,
+								PlanetService.Live({
+									size: defaultGridSize,
+									obstacles: defaultObstacles,
+								}),
+							),
+							Context.add(
+								RoverStateService,
+								RoverStateService.Live({
+									position: new Position({
+										x: Position.X(0),
+										y: Position.Y(0),
+									}),
+									orientation: initialOrientation,
+								}),
+							),
+						)
+
+					const program = move(Command.TurnLeft()).pipe(
+						Effect.provide(Services),
 					)
 
-					yield* Effect.exit(move(currentRoverStateRef, Command.TurnLeft()))
+					yield* Effect.exit(program)
 
-					const { orientation } = yield* Ref.get(currentRoverStateRef)
+					const currentRoverState = yield* pipe(
+						Services,
+						Context.get(RoverStateService),
+						Ref.get,
+					)
 
-					expect(orientation).toEqual(expectedNextOrientation)
-				}).pipe(
-					Effect.provideService(
-						PlanetService,
-						PlanetService.Live({
-							size: new GridSize({
-								width: GridSize.Width(5),
-								height: GridSize.Height(4),
-							}),
-							obstacles: HashSet.make<Position[]>(),
-						}),
-					),
-				),
+					expect(currentRoverState.orientation).toEqual(expectedNextOrientation)
+				}),
 		)
 	})
 
@@ -169,32 +184,41 @@ describe('move', () => {
 			'Given $initialOrientation._tag should return $expectedNextOrientation._tag',
 			({ initialOrientation, expectedNextOrientation }) =>
 				Effect.gen(function* () {
-					const currentRoverStateRef = yield* Ref.make(
-						new RoverState({
-							position: new Position({
-								x: Position.X(0),
-								y: Position.Y(0),
-							}),
-							orientation: initialOrientation,
-						}),
+					const Services: Context.Context<RoverStateService | PlanetService> =
+						Context.empty().pipe(
+							Context.add(
+								PlanetService,
+								PlanetService.Live({
+									size: defaultGridSize,
+									obstacles: defaultObstacles,
+								}),
+							),
+							Context.add(
+								RoverStateService,
+								RoverStateService.Live({
+									position: new Position({
+										x: Position.X(0),
+										y: Position.Y(0),
+									}),
+									orientation: initialOrientation,
+								}),
+							),
+						)
+
+					const program = move(Command.TurnRight()).pipe(
+						Effect.provide(Services),
 					)
 
-					yield* Effect.exit(move(currentRoverStateRef, Command.TurnRight()))
+					yield* Effect.exit(program)
 
-					const { orientation } = yield* Ref.get(currentRoverStateRef)
-					expect(orientation).toEqual(expectedNextOrientation)
-				}).pipe(
-					Effect.provideService(
-						PlanetService,
-						PlanetService.Live({
-							size: new GridSize({
-								width: GridSize.Width(5),
-								height: GridSize.Height(4),
-							}),
-							obstacles: HashSet.make<Position[]>(),
-						}),
-					),
-				),
+					const finalRoverState = yield* pipe(
+						Services,
+						Context.get(RoverStateService),
+						Ref.get,
+					)
+
+					expect(finalRoverState.orientation).toEqual(expectedNextOrientation)
+				}),
 		)
 	})
 
@@ -251,24 +275,35 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: defaultGridSize,
+										obstacles: defaultObstacles,
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const program = move(command).pipe(Effect.provide(Services))
 
-						const { position } = yield* Ref.get(currentRoverStateRef)
-						expect(position).toEqual(expectedRoverState.position)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						yield* Effect.exit(program)
+
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
+
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -283,41 +318,42 @@ describe('move', () => {
 								}),
 								orientation,
 							})
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(1),
+							})
+
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: defaultGridSize,
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
+
+							const program = move(command).pipe(Effect.provide(Services))
 
 							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(currentRoverStateRef, command),
-							)
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(0),
-											y: Position.Y(1),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make(
-										new Position({
-											x: Position.X(0),
-											y: Position.Y(1),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -373,25 +409,35 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: defaultGridSize,
+										obstacles: defaultObstacles,
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const program = move(command).pipe(Effect.provide(Services))
 
-						const { position } = yield* Ref.get(currentRoverStateRef)
+						yield* Effect.exit(program)
 
-						expect(position).toEqual(expectedRoverState.position)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
+
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -406,41 +452,45 @@ describe('move', () => {
 								}),
 								orientation,
 							})
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(3),
+							})
+
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
+
+							const program = move(command).pipe(Effect.provide(Services))
 
 							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(currentRoverStateRef, command),
-							)
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(0),
-											y: Position.Y(3),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make(
-										new Position({
-											x: Position.X(0),
-											y: Position.Y(3),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -507,25 +557,42 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make<Position[]>(),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const program = move(command).pipe(Effect.provide(Services))
 
-						const { position } = yield* Ref.get(currentRoverStateRef)
+						yield* Effect.exit(program)
 
-						expect(position).toEqual(expectedRoverState.position)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
+
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -540,41 +607,45 @@ describe('move', () => {
 								}),
 								orientation,
 							})
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
 							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(currentRoverStateRef, command),
-							)
+							const program = move(command).pipe(Effect.provide(Services))
+
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(0),
-											y: Position.Y(0),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make(
-										new Position({
-											x: Position.X(0),
-											y: Position.Y(0),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -641,24 +712,38 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make<Position[]>(),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const program = move(command).pipe(Effect.provide(Services))
 
-						const { position } = yield* Ref.get(currentRoverStateRef)
-						expect(position).toEqual(expectedRoverState.position)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						yield* Effect.exit(program)
+
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
+
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -673,42 +758,44 @@ describe('move', () => {
 								}),
 								orientation,
 							})
+							const obstaclePosition = new Position({
+								x: Position.X(4),
+								y: Position.Y(0),
+							})
 
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
 							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(currentRoverStateRef, command),
-							)
+							const program = move(command).pipe(Effect.provide(Services))
+
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(4),
-											y: Position.Y(0),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make(
-										new Position({
-											x: Position.X(4),
-											y: Position.Y(0),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -767,25 +854,38 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make<Position[]>(),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const program = move(command).pipe(Effect.provide(Services))
 
-						const { position } = yield* Ref.get(currentRoverStateRef)
+						yield* Effect.exit(program)
 
-						expect(position).toEqual(expectedRoverState.position)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
+
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -800,41 +900,45 @@ describe('move', () => {
 								}),
 								orientation,
 							})
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(3),
+							})
+
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
+
+							const program = move(command).pipe(Effect.provide(Services))
 
 							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(currentRoverStateRef, command),
-							)
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(0),
-											y: Position.Y(3),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make(
-										new Position({
-											x: Position.X(0),
-											y: Position.Y(3),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -890,25 +994,35 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: defaultGridSize,
+										obstacles: defaultObstacles,
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const program = move(command).pipe(Effect.provide(Services))
 
-						const currentRoverState = yield* Ref.get(currentRoverStateRef)
+						yield* Effect.exit(program)
 
-						expect(currentRoverState).toStrictEqual(expectedRoverState)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
+
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -923,41 +1037,42 @@ describe('move', () => {
 								}),
 								orientation,
 							})
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
+
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
+
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: defaultGridSize,
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
 							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(currentRoverStateRef, command),
-							)
+							const program = move(command).pipe(Effect.provide(Services))
+
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(0),
-											y: Position.Y(0),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make<Position[]>(
-										new Position({
-											x: Position.X(0),
-											y: Position.Y(0),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -1024,25 +1139,37 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make<Position[]>(),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const program = move(command).pipe(Effect.provide(Services))
+						yield* Effect.exit(program)
 
-						const { position } = yield* Ref.get(currentRoverStateRef)
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
 
-						expect(position).toEqual(expectedRoverState.position)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -1057,41 +1184,44 @@ describe('move', () => {
 								}),
 								orientation,
 							})
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
 
-							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(currentRoverStateRef, command),
+							const obstaclePosition = new Position({
+								x: Position.X(4),
+								y: Position.Y(0),
+							})
+
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
 							)
+
+							const program = move(command).pipe(Effect.provide(Services))
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(4),
-											y: Position.Y(0),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make(
-										new Position({
-											x: Position.X(4),
-											y: Position.Y(0),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -1158,23 +1288,38 @@ describe('move', () => {
 				'GIVEN ($initialRoverState.position.x, $initialRoverState.position.y) position, it SHOULD return ($expectedRoverState.position.x, $expectedRoverState.position.y)',
 				({ initialRoverState, expectedRoverState }) =>
 					Effect.gen(function* () {
-						const currentRoverStateRef = yield* Ref.make(initialRoverState)
-						yield* Effect.exit(move(currentRoverStateRef, command))
+						const Services: Context.Context<RoverStateService | PlanetService> =
+							Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make<Position[]>(),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+								),
+							)
 
-						const { position } = yield* Ref.get(currentRoverStateRef)
-						expect(position).toEqual(expectedRoverState.position)
-					}).pipe(
-						Effect.provideService(
-							PlanetService,
-							PlanetService.Live({
-								size: new GridSize({
-									width: GridSize.Width(5),
-									height: GridSize.Height(4),
-								}),
-								obstacles: HashSet.make<Position[]>(),
-							}),
-						),
-					),
+						const program = move(command).pipe(Effect.provide(Services))
+
+						yield* Effect.exit(program)
+
+						const currentRoverState = yield* pipe(
+							Services,
+							Context.get(RoverStateService),
+							Ref.get,
+						)
+
+						expect(Equal.equals(currentRoverState, expectedRoverState)).toBe(
+							true,
+						)
+					}),
 			)
 
 			describe('GIVEN an obstacle on its path', () => {
@@ -1189,45 +1334,45 @@ describe('move', () => {
 								}),
 								orientation,
 							})
-							const currentRoverStateRef = yield* Ref.make(initialRoverState)
 
-							// Capture the result as an Exit
-							const result = yield* Effect.exit(
-								move(
-									currentRoverStateRef,
+							const obstaclePosition = new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							})
 
-									command,
+							const Services: Context.Context<
+								RoverStateService | PlanetService
+							> = Context.empty().pipe(
+								Context.add(
+									PlanetService,
+									PlanetService.Live({
+										size: new GridSize({
+											width: GridSize.Width(5),
+											height: GridSize.Height(4),
+										}),
+										obstacles: HashSet.make(obstaclePosition),
+									}),
+								),
+								Context.add(
+									RoverStateService,
+									RoverStateService.of(Ref.unsafeMake(initialRoverState)),
 								),
 							)
+
+							const program = move(command).pipe(Effect.provide(Services))
+
+							// Capture the result as an Exit
+							const result = yield* Effect.exit(program)
 
 							expect(result).toStrictEqual(
 								Exit.fail(
 									new CollisionDetected({
-										obstaclePosition: new Position({
-											x: Position.X(0),
-											y: Position.Y(0),
-										}),
+										obstaclePosition: obstaclePosition,
 										roverState: initialRoverState,
 									}),
 								),
 							)
-						}).pipe(
-							Effect.provideService(
-								PlanetService,
-								PlanetService.Live({
-									size: new GridSize({
-										width: GridSize.Width(5),
-										height: GridSize.Height(4),
-									}),
-									obstacles: HashSet.make<Position[]>(
-										new Position({
-											x: Position.X(0),
-											y: Position.Y(0),
-										}),
-									),
-								}),
-							),
-						),
+						}),
 				)
 			})
 		})
@@ -1250,7 +1395,6 @@ describe('processBatch', () => {
 								obstacles: HashSet.make<Position[]>(),
 							}),
 						),
-
 						Context.add(
 							RoverStateService,
 							/**
@@ -1318,7 +1462,6 @@ describe('processBatch', () => {
 									obstacles: HashSet.make<Position[]>(),
 								}),
 							),
-
 							Context.add(
 								RoverStateService,
 								/**
@@ -1450,7 +1593,6 @@ describe('processBatch', () => {
 									obstacles: HashSet.make(obstacle),
 								}),
 							),
-
 							Context.add(
 								RoverStateService,
 								/**
