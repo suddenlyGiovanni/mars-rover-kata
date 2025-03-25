@@ -8,13 +8,13 @@ import {
 	pipe,
 } from 'effect'
 
-import { Command } from './command.ts'
-import type { GridSize } from './grid-size.ts'
-import { Int } from './int.ts'
-import { Orientation } from './orientation.ts'
-import { type Planet, PlanetService } from './planet.ts'
-import { Position } from './position.ts'
-import { type RoverState, RoverStateService } from './rover-state.ts'
+import { Command } from './domain/command.ts'
+import type { GridSize } from './domain/grid-size.ts'
+import { Int } from './domain/int.ts'
+import { Orientation } from './domain/orientation.ts'
+import { type Planet, PlanetService } from './domain/planet.ts'
+import { Position } from './domain/position.ts'
+import { type RoverState, RoverStateService } from './domain/rover-state.ts'
 
 /**
  * Wraps a position coordinate around grid boundaries (pacman effect).

@@ -11,18 +11,18 @@ import {
 	pipe,
 } from 'effect'
 
-import { Command } from './command.ts'
-import { GridSize } from './grid-size.ts'
-import { Orientation } from './orientation.ts'
+import { Command } from './domain/command.ts'
+import { GridSize } from './domain/grid-size.ts'
+import { Orientation } from './domain/orientation.ts'
+import { PlanetService } from './domain/planet.ts'
+import { Position } from './domain/position.ts'
+import { RoverState, RoverStateService } from './domain/rover-state.ts'
 import {
 	CollisionDetected,
 	move,
 	processBatch,
 	wrapGridPosition,
 } from './parser.ts'
-import { PlanetService } from './planet.ts'
-import { Position } from './position.ts'
-import { RoverState, RoverStateService } from './rover-state.ts'
 
 describe('wrapGridPosition', () => {
 	// Define common grid sizes for tests
