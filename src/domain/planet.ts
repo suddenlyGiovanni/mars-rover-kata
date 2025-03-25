@@ -53,4 +53,8 @@ export class Planet extends Data.TaggedClass('Planet')<{
 export class PlanetService extends Context.Tag('app/PlanetService')<
 	PlanetService,
 	Planet
->() {}
+>() {
+	public static readonly Live = (
+		planet: ConstructorParameters<typeof Planet>[0],
+	) => new Planet(planet)
+}

@@ -1093,7 +1093,18 @@ describe('processBatch', () => {
 					}),
 				)
 				expect(finalRover.orientation).toEqual(Orientation.West())
-			}).pipe(Effect.provideService(PlanetService, planet)),
+			}).pipe(
+				Effect.provideService(
+					PlanetService,
+					PlanetService.Live({
+						size: new GridSize({
+							width: GridSize.Width(5),
+							height: GridSize.Height(4),
+						}),
+						obstacles: HashSet.make<Position[]>(),
+					}),
+				),
+			),
 		)
 
 		it.effect(
@@ -1128,7 +1139,18 @@ describe('processBatch', () => {
 					expect(yield* Ref.get(currentRoverRef)).toStrictEqual(
 						initialRoverState,
 					)
-				}).pipe(Effect.provideService(PlanetService, planet)),
+				}).pipe(
+					Effect.provideService(
+						PlanetService,
+						PlanetService.Live({
+							size: new GridSize({
+								width: GridSize.Width(5),
+								height: GridSize.Height(4),
+							}),
+							obstacles: HashSet.make<Position[]>(),
+						}),
+					),
+				),
 		)
 
 		it.effect(
@@ -1177,7 +1199,18 @@ describe('processBatch', () => {
 					expect(Equal.equals(finalRover.orientation, Orientation.Est())).toBe(
 						true,
 					)
-				}).pipe(Effect.provideService(PlanetService, planet)),
+				}).pipe(
+					Effect.provideService(
+						PlanetService,
+						PlanetService.Live({
+							size: new GridSize({
+								width: GridSize.Width(5),
+								height: GridSize.Height(4),
+							}),
+							obstacles: HashSet.make<Position[]>(),
+						}),
+					),
+				),
 		)
 
 		it.effect(
@@ -1237,9 +1270,12 @@ describe('processBatch', () => {
 				}).pipe(
 					Effect.provideService(
 						PlanetService,
-						planet.clone({
-							obstacles: HashSet.add(
-								planet.obstacles,
+						PlanetService.Live({
+							size: new GridSize({
+								width: GridSize.Width(5),
+								height: GridSize.Height(4),
+							}),
+							obstacles: HashSet.make(
 								/**
 								 * Arrange: Place an obstacle at (0,2)
 								 */
