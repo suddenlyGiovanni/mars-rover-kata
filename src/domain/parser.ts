@@ -14,7 +14,7 @@ import { Int } from './int.ts'
 import { Orientation } from './orientation.ts'
 import { type Planet, PlanetService } from './planet.ts'
 import { Position } from './position.ts'
-import type { RoverState } from './rover-state.ts'
+import { type RoverState, RoverStateService } from './rover-state.ts'
 
 /**
  * Wraps a position coordinate around grid boundaries (pacman effect).
@@ -54,13 +54,16 @@ export class CollisionDetected extends Data.TaggedError('CollisionDetected')<{
 }> {}
 
 export function processBatch(
-	currentRoverStateRef: Ref.Ref<RoverState>,
 	commands: Array.NonEmptyReadonlyArray<Command>,
-): Effect.Effect<void, CollisionDetected, PlanetService> {
-	return Effect.forEach(
-		commands,
-		(command) => move(currentRoverStateRef, command),
-		{ discard: true },
+): Effect.Effect<void, CollisionDetected, PlanetService | RoverStateService> {
+	return RoverStateService.pipe(
+		Effect.flatMap((currentRoverStateRef) => {
+			return Effect.forEach(
+				commands,
+				(command) => move(currentRoverStateRef, command),
+				{ discard: true },
+			)
+		}),
 	)
 }
 

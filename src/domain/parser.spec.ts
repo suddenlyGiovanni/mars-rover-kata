@@ -2,11 +2,13 @@ import { describe, expect, it } from '@effect/vitest'
 import {
 	// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 	Array,
+	Context,
 	Effect,
 	Equal,
 	Exit,
 	HashSet,
 	Ref,
+	pipe,
 } from 'effect'
 
 import { Command } from './command.ts'
@@ -20,7 +22,7 @@ import {
 } from './parser.ts'
 import { PlanetService } from './planet.ts'
 import { Position } from './position.ts'
-import { RoverState } from './rover-state.ts'
+import { RoverState, RoverStateService } from './rover-state.ts'
 
 describe('wrapGridPosition', () => {
 	// Define common grid sizes for tests
@@ -1236,22 +1238,9 @@ describe('processBatch', () => {
 	describe('GIVEN a rover and a sequence of commands', () => {
 		it.effect('SHOULD handle a single command correctly', ({ expect }) =>
 			Effect.gen(function* () {
-				/**
-				 * Arrange: Initial rover at (0,0) facing North
-				 */
-				const currentRoverRef: Ref.Ref<RoverState> = yield* Ref.make(
-					new RoverState({
-						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
-						orientation: Orientation.North(),
-					}),
-				)
-
-				/**
-				 * Act: Single command Turn left
-				 */
-				const program: Effect.Effect<void, CollisionDetected, never> =
-					processBatch(currentRoverRef, Array.make(Command.TurnLeft())).pipe(
-						Effect.provideService(
+				const Services: Context.Context<RoverStateService | PlanetService> =
+					Context.empty().pipe(
+						Context.add(
 							PlanetService,
 							PlanetService.Live({
 								size: new GridSize({
@@ -1261,6 +1250,25 @@ describe('processBatch', () => {
 								obstacles: HashSet.make<Position[]>(),
 							}),
 						),
+
+						Context.add(
+							RoverStateService,
+							/**
+							 * Arrange: Initial rover at (0,0) facing North
+							 */
+							RoverStateService.Live({
+								position: new Position({ x: Position.X(0), y: Position.Y(0) }),
+								orientation: Orientation.North(),
+							}),
+						),
+					)
+
+				/**
+				 * Act: Single command Turn left
+				 */
+				const program: Effect.Effect<void, CollisionDetected, never> =
+					processBatch(Array.make(Command.TurnLeft())).pipe(
+						Effect.provide(Services),
 					)
 
 				const result: Exit.Exit<void, CollisionDetected> =
@@ -1268,15 +1276,24 @@ describe('processBatch', () => {
 
 				expect(result).toStrictEqual(Exit.void)
 
-				const finalRover = yield* Ref.get(currentRoverRef)
-
-				expect(finalRover.position).toEqual(
-					new Position({
-						x: Position.X(0),
-						y: Position.Y(0),
-					}),
+				const finalRoverState = yield* pipe(
+					Services, //
+					Context.get(RoverStateService),
+					Ref.get,
 				)
-				expect(finalRover.orientation).toEqual(Orientation.West())
+
+				expect(
+					Equal.equals(
+						finalRoverState,
+						new RoverState({
+							position: new Position({
+								x: Position.X(0),
+								y: Position.Y(0),
+							}),
+							orientation: Orientation.West(),
+						}),
+					),
+				).toBe(true)
 			}),
 		)
 
@@ -1284,26 +1301,14 @@ describe('processBatch', () => {
 			'SHOULD handle commands that cancel each other out by returning the initial rover state unchanged',
 			({ expect }) =>
 				Effect.gen(function* () {
-					/**
-					 * Arrange: Initial rover at (0,0) facing North
-					 */
 					const initialRoverState = new RoverState({
 						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
 						orientation: Orientation.North(),
 					})
 
-					const currentRoverRef: Ref.Ref<RoverState> =
-						yield* Ref.make(initialRoverState)
-
-					/**
-					 * Act: Commands that cancel each other out (turn left then turn right)
-					 */
-					const program: Effect.Effect<void, CollisionDetected, never> =
-						processBatch(
-							currentRoverRef,
-							Array.make(Command.TurnLeft(), Command.TurnRight()),
-						).pipe(
-							Effect.provideService(
+					const Services: Context.Context<RoverStateService | PlanetService> =
+						Context.empty().pipe(
+							Context.add(
 								PlanetService,
 								PlanetService.Live({
 									size: new GridSize({
@@ -1313,19 +1318,39 @@ describe('processBatch', () => {
 									obstacles: HashSet.make<Position[]>(),
 								}),
 							),
+
+							Context.add(
+								RoverStateService,
+								/**
+								 * Arrange: Initial rover at (0,0) facing North
+								 */
+								RoverStateService.of(Ref.unsafeMake(initialRoverState)),
+							),
 						)
+
+					/**
+					 * Act: Commands that cancel each other out (turn left then turn right)
+					 */
+					const program: Effect.Effect<void, CollisionDetected, never> =
+						processBatch(
+							Array.make(Command.TurnLeft(), Command.TurnRight()),
+						).pipe(Effect.provide(Services))
 
 					const result: Exit.Exit<void, CollisionDetected> =
 						yield* Effect.exit(program)
 
 					expect(result).toStrictEqual(Exit.void)
 
+					const currentRoverState = yield* pipe(
+						Services, //
+						Context.get(RoverStateService),
+						Ref.get,
+					)
+
 					/**
 					 * Assert: Check the final rover state (should be unchanged)
 					 */
-					expect(yield* Ref.get(currentRoverRef)).toStrictEqual(
-						initialRoverState,
-					)
+					expect(Equal.equals(currentRoverState, initialRoverState)).toBe(true)
 				}),
 		)
 
@@ -1333,30 +1358,9 @@ describe('processBatch', () => {
 			'SHOULD process all commands and return the final rover state with no collision',
 			({ expect }) =>
 				Effect.gen(function* () {
-					/**
-					 * Arrange: Initial rover at (0,0) facing North
-					 */
-					const initialRoverState = new RoverState({
-						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
-						orientation: Orientation.North(),
-					})
-
-					const currentRoverRef: Ref.Ref<RoverState> =
-						yield* Ref.make(initialRoverState)
-
-					/**
-					 * Act: batch Commands
-					 */
-					const program: Effect.Effect<void, CollisionDetected, never> =
-						processBatch(
-							currentRoverRef,
-							Array.make(
-								Command.GoForward(),
-								Command.TurnRight(),
-								Command.GoForward(),
-							),
-						).pipe(
-							Effect.provideService(
+					const Services: Context.Context<RoverStateService | PlanetService> =
+						Context.empty().pipe(
+							Context.add(
 								PlanetService,
 								PlanetService.Live({
 									size: new GridSize({
@@ -1366,7 +1370,32 @@ describe('processBatch', () => {
 									obstacles: HashSet.make<Position[]>(),
 								}),
 							),
+							Context.add(
+								RoverStateService,
+								/**
+								 * Arrange: Initial rover at (0,0) facing North
+								 */
+								RoverStateService.Live({
+									position: new Position({
+										x: Position.X(0),
+										y: Position.Y(0),
+									}),
+									orientation: Orientation.North(),
+								}),
+							),
 						)
+
+					/**
+					 * Act: batch Commands
+					 */
+					const program: Effect.Effect<void, CollisionDetected, never> =
+						processBatch(
+							Array.make(
+								Command.GoForward(),
+								Command.TurnRight(),
+								Command.GoForward(),
+							),
+						).pipe(Effect.provide(Services))
 
 					const result: Exit.Exit<void, CollisionDetected> =
 						yield* Effect.exit(program)
@@ -1376,18 +1405,24 @@ describe('processBatch', () => {
 					/**
 					 * Assert Expected final position: (1,1) facing East
 					 */
-					const finalRover = yield* Ref.get(currentRoverRef)
-
-					expect(finalRover.position).toStrictEqual(
-						new Position({
-							x: Position.X(1),
-							y: Position.Y(1),
-						}),
+					const currentRoverState = yield* pipe(
+						Services,
+						Context.get(RoverStateService),
+						Ref.get,
 					)
 
-					expect(Equal.equals(finalRover.orientation, Orientation.Est())).toBe(
-						true,
-					)
+					expect(
+						Equal.equals(
+							currentRoverState,
+							new RoverState({
+								position: new Position({
+									x: Position.X(1),
+									y: Position.Y(1),
+								}),
+								orientation: Orientation.Est(),
+							}),
+						),
+					).toBe(true)
 				}),
 		)
 
@@ -1396,17 +1431,6 @@ describe('processBatch', () => {
 			({ expect }) =>
 				Effect.gen(function* () {
 					/**
-					 * Arrange: Initial rover at (0,0) facing North
-					 */
-					const initialRoverState = new RoverState({
-						position: new Position({ x: Position.X(0), y: Position.Y(0) }),
-						orientation: Orientation.North(),
-					})
-
-					const currentRoverRef: Ref.Ref<RoverState> =
-						yield* Ref.make(initialRoverState)
-
-					/**
 					 * Arrange: Place an obstacle at (0,2)
 					 */
 					const obstacle = new Position({
@@ -1414,22 +1438,9 @@ describe('processBatch', () => {
 						y: Position.Y(2),
 					})
 
-					/**
-					 * Act: Commands Move forward twice (second move will cause collision), then turn right
-					 */
-					const program: Effect.Effect<void, CollisionDetected, never> =
-						processBatch(
-							currentRoverRef,
-							/**
-							 * Commands Move forward twice (second move will cause collision), then turn right
-							 */
-							Array.make(
-								Command.GoForward(),
-								Command.GoForward(),
-								Command.TurnRight(),
-							),
-						).pipe(
-							Effect.provideService(
+					const Services: Context.Context<RoverStateService | PlanetService> =
+						Context.empty().pipe(
+							Context.add(
 								PlanetService,
 								PlanetService.Live({
 									size: new GridSize({
@@ -1439,7 +1450,36 @@ describe('processBatch', () => {
 									obstacles: HashSet.make(obstacle),
 								}),
 							),
+
+							Context.add(
+								RoverStateService,
+								/**
+								 * Arrange: Initial rover at (0,0) facing North
+								 */
+								RoverStateService.Live({
+									position: new Position({
+										x: Position.X(0),
+										y: Position.Y(0),
+									}),
+									orientation: Orientation.North(),
+								}),
+							),
 						)
+
+					/**
+					 * Act: Commands Move forward twice (second move will cause collision), then turn right
+					 */
+					const program: Effect.Effect<void, CollisionDetected, never> =
+						processBatch(
+							/**
+							 * Commands Move forward twice (second move will cause collision), then turn right
+							 */
+							Array.make(
+								Command.GoForward(),
+								Command.GoForward(),
+								Command.TurnRight(),
+							),
+						).pipe(Effect.provide(Services))
 
 					const result: Exit.Exit<void, CollisionDetected> =
 						yield* Effect.exit(program)

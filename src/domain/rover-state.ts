@@ -1,4 +1,4 @@
-import { Data } from 'effect'
+import { Context, Data, Ref } from 'effect'
 
 import type { Orientation } from './orientation.ts'
 import type { Position } from './position.ts'
@@ -38,4 +38,14 @@ export class RoverState extends Data.TaggedClass('RoverState')<{
 						: this.orientation,
 				})
 	}
+}
+
+export class RoverStateService extends Context.Tag('app/RoverStateService')<
+	RoverStateService,
+	Ref.Ref<RoverState>
+>() {
+	public static readonly Live: (
+		rover: ConstructorParameters<typeof RoverState>[0],
+	) => Ref.Ref<RoverState> = (rover) =>
+		RoverStateService.of(Ref.unsafeMake(new RoverState(rover)))
 }
